@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:train_booking_app/station_list.dart';
 import 'station_list_page.dart'; // 기차역 리스트 페이지 import
@@ -127,4 +129,19 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class SeatPage {}
+class SeatPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('좌석 선택')),
+      body: Center(child: Text('좌석을 선택하세요')),
+    );
+  }
+}
+
+ElevatedButton(
+  onPressed: () {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SeatPage()));
+  },
+  child: Text('좌석 선택'),
+);
