@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(StationListPage());
-}
-
 class StationListPage extends StatelessWidget {
   final List<String> stations = [
     '수서',
@@ -19,6 +15,10 @@ class StationListPage extends StatelessWidget {
     '부산'
   ];
 
+  final String? selectedStation; // 이미 선택된 역 (출발 또는 도착)
+
+  StationListPage({this.selectedStation});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +26,14 @@ class StationListPage extends StatelessWidget {
       body: ListView.builder(
         itemCount: stations.length,
         itemBuilder: (context, index) {
+          if (stations[index] == selectedStation)
+            return Container(); // 이미 선택된 역은 표시하지 않음
+
           return ListTile(
             title: Text(stations[index],
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             onTap: () {
-              // 역 선택 후 HomePage로 돌아가기
-              Navigator.pop(context, stations[index]);
+              Navigator.pop(context, stations[index]); // 역을 선택하고 HomePage로 돌아가기
             },
           );
         },

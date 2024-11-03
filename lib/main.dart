@@ -1,8 +1,6 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'package:flutter/material.dart';
-import 'package:train_booking_app/station_list.dart';
-import 'station_list_page.dart'; // 기차역 리스트 페이지 import
+import 'station_list.dart'; // 기차역 리스트 페이지 import
+import 'seat_page.dart'; // 좌석 선택 페이지 import
 
 class HomePage extends StatefulWidget {
   @override
@@ -39,7 +37,8 @@ class _HomePageState extends State<HomePage> {
                     final selectedStation = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StationListPage()),
+                          builder: (context) =>
+                              StationListPage(selectedStation: arrivalStation)),
                     );
                     if (selectedStation != null) {
                       setState(() {
@@ -60,7 +59,8 @@ class _HomePageState extends State<HomePage> {
                     final selectedStation = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StationListPage()),
+                          builder: (context) => StationListPage(
+                              selectedStation: departureStation)),
                     );
                     if (selectedStation != null) {
                       setState(() {
@@ -80,12 +80,14 @@ class _HomePageState extends State<HomePage> {
                   ? () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SeatPage()),
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                SeatPage(departureStation!, arrivalStation!)),
                       );
                     }
                   : null, // 출발역과 도착역이 모두 선택되지 않으면 비활성화
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple, // 버튼 색상
+                iconColor: Colors.purple, // 버튼 색상
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20), // 모서리 둥글기
                 ),
@@ -128,20 +130,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-class SeatPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('좌석 선택')),
-      body: Center(child: Text('좌석을 선택하세요')),
-    );
-  }
-}
-
-ElevatedButton(
-  onPressed: () {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SeatPage()));
-  },
-  child: Text('좌석 선택'),
-);
