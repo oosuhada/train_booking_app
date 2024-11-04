@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class SeatPage extends StatefulWidget {
   final String departure;
@@ -13,7 +13,7 @@ class SeatPage extends StatefulWidget {
 
 class _SeatPageState extends State<SeatPage> {
   List<List<bool>> seats = List.generate(
-      20, (_) => List.generate(4, (_) => false)); // 20개의 행, 4개의 열(A/B/C/D)
+      10, (_) => List.generate(4, (_) => false)); // 10개의 행, 4개의 열(A/B/C/D)
 
   int? selectedRow;
   int? selectedColumn;
@@ -86,31 +86,30 @@ class _SeatPageState extends State<SeatPage> {
             ),
             SizedBox(height: 20),
 
-            // ABCD 레이블
+            // ABCD 레이블 (A/B 열과 C/D 열 사이에 빈칸)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['A', 'B', '', 'C', 'D'] // 가운데에 빈 문자열로 간격 추가
+              children: ['A', 'B', '', 'C', 'D'] // 가운데에 빈 문자열로 간격 추가 및 열 번호 표시
                   .map((label) => Text(label, style: TextStyle(fontSize: 18)))
                   .toList(),
             ),
 
-            // 좌석 그리드
             // 좌석 그리드 (A/B 열과 C/D 열 사이에 열 번호 추가)
             Expanded(
               child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount:
-                          seats[0].length + 2), // 가운데 빈 칸과 열 번호 포함하여 열 수 증가
+                          seats[0].length + 1), // 가운데 빈 칸과 열 번호 포함하여 열 수 증가
                   itemCount: seats.length *
-                      (seats[0].length + 2), // 총 아이템 수 (빈 칸 및 열 번호 포함)
+                      (seats[0].length + 1), // 총 아이템 수 (빈 칸 및 열 번호 포함)
                   itemBuilder: (context, index) {
-                    if (index % (seats[0].length + 2) == 2) {
+                    if (index % (seats[0].length + 1) == 2) {
                       // 가운데 빈 칸 처리
                       return Container();
                     }
-                    if (index % (seats[0].length + 2) == 3) {
+                    if (index % (seats[0].length + 1) == 2) {
                       // 열 번호 출력
-                      int row = index ~/ (seats[0].length + 2) + 1;
+                      int row = index ~/ (seats[0].length + 1) + 1;
                       return Center(
                           child: Container(
                               width: 50,
@@ -119,10 +118,10 @@ class _SeatPageState extends State<SeatPage> {
                                   child: Text(row.toString(),
                                       style: TextStyle(fontSize: 18)))));
                     }
-                    int row = index ~/ (seats[0].length + 2);
-                    int col = index % (seats[0].length + 2) > 3
-                        ? index % (seats[0].length + 2) - 2
-                        : index % (seats[0].length + 2); // 빈 칸 이후 열 계산
+                    int row = index ~/ (seats[0].length + 1);
+                    int col = index % (seats[0].length + 1) > 2
+                        ? index % (seats[0].length + 1) - 2
+                        : index % (seats[0].length + 1); // 빈 칸 이후 열 계산
                     return GestureDetector(
                         onTap: () {
                           setState(() {
