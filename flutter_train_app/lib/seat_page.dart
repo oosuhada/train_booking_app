@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../payment_page.dart';
 
@@ -152,7 +153,6 @@ class _SeatPageState extends State<SeatPage> {
                             arrival: widget.arrival,
                             seatNumbers: selectedSeats,
                             isRoundTrip: widget.isRoundTrip,
-                            seatNumber: '',
                           ),
                         ),
                       );
