@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 20), // 여백 추가
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
