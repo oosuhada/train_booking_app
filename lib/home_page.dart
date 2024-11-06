@@ -142,21 +142,17 @@ class _HomePageState extends State<HomePage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => SeatPage(
-                                    departureStation!,
-                                    arrivalStation!,
-                                    setState as int,
-                                    isRoundTrip,
+                                    departureStation!, // 출발역
+                                    arrivalStation!, // 도착역
+                                    adultCount, // 성인 수 (예시로 추가)
+                                    childCount, // 어린이 수 (예시로 추가)
+                                    seniorCount, // 노인 수 (예시로 추가)
+                                    isRoundTrip, // 왕복 여부
                                   ),
                                 ),
                               );
                             }
                           : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15.0),
                     child: Text(

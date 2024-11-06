@@ -5,10 +5,13 @@ import 'package:intl/intl.dart';
 class SeatPage extends StatefulWidget {
   final String departure;
   final String arrival;
-  final int passengerCount;
+  final int adultCount;
+  final int childCount;
+  final int seniorCount;
   final bool isRoundTrip;
 
-  SeatPage(this.departure, this.arrival, this.passengerCount, this.isRoundTrip);
+  SeatPage(this.departure, this.arrival, this.adultCount, this.childCount,
+      this.seniorCount, this.isRoundTrip);
 
   @override
   _SeatPageState createState() => _SeatPageState();
@@ -24,105 +27,120 @@ class _SeatPageState extends State<SeatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('좌석 선택')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      widget.departure,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.departure,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Icon(Icons.arrow_circle_right_outlined, size: 30),
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      widget.arrival,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+                  Icon(Icons.arrow_circle_right_outlined, size: 30),
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.arrival,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  onPressed: () {
-                    setState(() {
-                      selectedDate = selectedDate.subtract(Duration(days: 1));
-                    });
-                  },
-                ),
-                Text(
-                  DateFormat('yyyy년 MM월 dd일').format(selectedDate),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  onPressed: () {
-                    setState(() {
-                      selectedDate = selectedDate.add(Duration(days: 1));
-                    });
-                  },
-                ),
-                SizedBox(width: 4),
-                Text('선택됨'),
-                SizedBox(width: 20),
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: () {
+                      setState(() {
+                        selectedDate = selectedDate.subtract(Duration(days: 1));
+                      });
+                    },
                   ),
-                ),
-                SizedBox(width: 4),
-                Text('선택 안됨'),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['A', 'B', '', 'C', 'D']
-                  .map((label) => Text(label, style: TextStyle(fontSize: 18)))
-                  .toList(),
-            ),
-            Expanded(
-              child: GridView.builder(
+                  Text(
+                    DateFormat('yyyy년 MM월 dd일').format(selectedDate),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios),
+                    onPressed: () {
+                      setState(() {
+                        selectedDate = selectedDate.add(Duration(days: 1));
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('선택됨'),
+                  SizedBox(width: 20),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.purple,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Text('선택 안됨'),
+                  SizedBox(width: 20),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: ['A', 'B', '', 'C', 'D']
+                    .map((label) => Text(label, style: TextStyle(fontSize: 18)))
+                    .toList(),
+              ),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: seats[0].length + 1),
+                  crossAxisCount: seats[0].length + 1,
+                  childAspectRatio: 1.5,
+                ),
                 itemCount: seats.length * (seats[0].length + 1),
                 itemBuilder: (context, index) {
                   if (index % (seats[0].length + 1) == 2) {
                     int row = index ~/ (seats[0].length + 1) + 1;
                     return Center(
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            child: Center(
-                                child: Text(row.toString(),
-                                    style: TextStyle(fontSize: 18)))));
+                      child:
+                          Text(row.toString(), style: TextStyle(fontSize: 18)),
+                    );
                   }
                   int row = index ~/ (seats[0].length + 1);
                   int col = index % (seats[0].length + 1) > 2
@@ -136,7 +154,9 @@ class _SeatPageState extends State<SeatPage> {
                           selectedSeats.remove(
                               '${row + 1}${String.fromCharCode(65 + col)}');
                         } else if (selectedSeats.length <
-                            widget.passengerCount) {
+                            widget.adultCount +
+                                widget.childCount +
+                                widget.seniorCount) {
                           seats[row][col] = true;
                           selectedSeats.add(
                               '${row + 1}${String.fromCharCode(65 + col)}');
@@ -144,57 +164,67 @@ class _SeatPageState extends State<SeatPage> {
                       });
                     },
                     child: Container(
-                        margin: EdgeInsets.all(4),
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: seats[row][col]
-                                ? Colors.purple
-                                : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8))),
+                      margin: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color:
+                            seats[row][col] ? Colors.purple : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   );
                 },
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text('선택한 좌석: ${selectedSeats.join(", ")}'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: selectedSeats.length == widget.passengerCount
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentPage(
+              SizedBox(height: 20),
+              Text(
+                '선택한 좌석: ${selectedSeats.join(", ")}',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '어른: ${widget.adultCount}, 어린이: ${widget.childCount}, 경로: ${widget.seniorCount}',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: selectedSeats.length ==
+                        widget.adultCount +
+                            widget.childCount +
+                            widget.seniorCount
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentPage(
                               departure: widget.departure,
                               arrival: widget.arrival,
                               seatNumbers: selectedSeats,
                               isRoundTrip: widget.isRoundTrip,
-                              travelDate: selectedDate //
-                              ),
-                        ),
-                      );
-                    }
-                  : null,
-              child: Text(
-                '예매 하기',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                              travelDate: selectedDate,
+                              adultCount: widget.adultCount,
+                              childCount: widget.childCount,
+                              seniorCount: widget.seniorCount,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                child: Text(
+                  '예매 하기',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  minimumSize: Size(double.infinity, 50),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                minimumSize: Size(double.infinity, 50),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
