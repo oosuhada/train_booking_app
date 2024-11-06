@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'payment_page.dart';
 
 class StationListPage extends StatelessWidget {
   final List<String> stations = [
