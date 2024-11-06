@@ -50,54 +50,48 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                      child: Text(departureStation ?? '출발역',
+                          textAlign: TextAlign.center)),
+                  Icon(Icons.arrow_forward),
+                  Expanded(
+                      child: Text(arrivalStation ?? '도착역',
+                          textAlign: TextAlign.center)),
+                ],
+              ),
+              SizedBox(height: 10),
               Container(
-                height: 200,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
-                      child: _buildStationSelector('출발역', departureStation,
-                          () async {
-                        final selectedStation = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StationListPage(
-                                    selectedStation: arrivalStation)));
-                        if (selectedStation != null) {
-                          setState(() {
-                            departureStation = selectedStation;
-                          });
-                        }
-                      }),
+                      child: Center(
+                        child: Text(
+                          departureStation ?? '선택',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.swap_horiz),
-                      onPressed: () {
-                        setState(() {
-                          final temp = departureStation;
-                          departureStation = arrivalStation;
-                          arrivalStation = temp;
-                        });
-                      },
+                    Container(
+                      width: 1,
+                      color: Colors.grey,
                     ),
                     Expanded(
-                      child: _buildStationSelector('도착역', arrivalStation,
-                          () async {
-                        final selectedStation = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StationListPage(
-                                    selectedStation: departureStation)));
-                        if (selectedStation != null) {
-                          setState(() {
-                            arrivalStation = selectedStation;
-                          });
-                        }
-                      }),
+                      child: Center(
+                        child: Text(
+                          arrivalStation ?? '선택',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -143,12 +137,12 @@ class _HomePageState extends State<HomePage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => SeatPage(
-                                    departureStation!, // 출발역
-                                    arrivalStation!, // 도착역
-                                    adultCount, // 성인 수 (예시로 추가)
-                                    childCount, // 어린이 수 (예시로 추가)
-                                    seniorCount, // 노인 수 (예시로 추가)
-                                    isRoundTrip, // 왕복 여부
+                                    departureStation!,
+                                    arrivalStation!,
+                                    adultCount,
+                                    childCount,
+                                    seniorCount,
+                                    isRoundTrip,
                                   ),
                                 ),
                               );
@@ -164,6 +158,12 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        (departureStation != null && arrivalStation != null)
+                            ? Colors.purple
+                            : Colors.grey,
                   ),
                 ),
               ),
