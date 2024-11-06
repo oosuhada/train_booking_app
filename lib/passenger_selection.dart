@@ -31,7 +31,7 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
   Widget _buildCounterRow(
       String title, String subtitle, int count, Function(int) onChanged) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -78,14 +78,14 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
               _adultCount,
               (newCount) => setState(() => _adultCount = newCount),
             ),
-            Divider(),
+            Divider(height: 32),
             _buildCounterRow(
               '어린이',
               '만 6세 ~ 만 12세',
               _childCount,
               (newCount) => setState(() => _childCount = newCount),
             ),
-            Divider(),
+            Divider(height: 32),
             _buildCounterRow(
               '경로',
               '만 65세 이상',
@@ -96,26 +96,46 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('취소'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text('취소',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                      ),
+                    ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, {
-                      'adult': _adultCount,
-                      'child': _childCount,
-                      'senior': _seniorCount,
-                    });
-                  },
-                  child: Text('확인'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context, {
+                          'adult': _adultCount,
+                          'child': _childCount,
+                          'senior': _seniorCount,
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text('확인',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                      ),
+                    ),
                   ),
                 ),
               ],
