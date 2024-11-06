@@ -4,17 +4,15 @@ import 'station_list.dart';
 class PaymentPage extends StatefulWidget {
   final String departure;
   final String arrival;
-  final String seatNumber;
+  final List<String> seatNumbers;
+  final bool isRoundTrip;
 
   PaymentPage({
     required this.departure,
     required this.arrival,
-    required this.seatNumber,
-    required List<String> seatNumbers,
-    required bool isRoundTrip,
+    required this.seatNumbers,
+    required this.isRoundTrip,
   });
-
-  get isRoundTrip => null;
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -25,6 +23,7 @@ class _PaymentPageState extends State<PaymentPage> {
   int discountedPrice = 0;
   String? selectedCoupon;
 
+  @override
   void initState() {
     super.initState();
     basePrice = PriceInfo.getPrice(widget.departure, widget.arrival);
@@ -67,7 +66,7 @@ class _PaymentPageState extends State<PaymentPage> {
             SizedBox(height: 20),
             Text('출발역: ${widget.departure}'),
             Text('도착역: ${widget.arrival}'),
-            Text('좌석: ${widget.seatNumber}'),
+            Text('좌석: ${widget.seatNumbers.join(", ")}'),
             Text(widget.isRoundTrip ? "왕복" : "편도"),
             SizedBox(height: 20),
             Text('기본 가격: $basePrice원'),

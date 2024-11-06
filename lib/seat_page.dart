@@ -151,8 +151,7 @@ class _SeatPageState extends State<SeatPage> {
                             departure: widget.departure,
                             arrival: widget.arrival,
                             seatNumbers: selectedSeats,
-                            isRoundTrip: widget.isRoundTrip,
-                            seatNumber: '',
+                            isRoundTrip: widget.isRoundTrip, //
                           ),
                         ),
                       );
