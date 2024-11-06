@@ -132,3 +132,52 @@ class PriceInfo {
     return 0; // 가격 정보가 없는 경우
   }
 }
+
+class PriceCalculateInfo {
+  static int getPrice(String departure, String arrival, bool isRoundTrip,
+      int adultCount, int childCount, int seniorCount) {
+    int basePrice = PriceInfo.getPrice(departure, arrival);
+
+    // 성인 가격 계산
+    int adultPrice = basePrice * adultCount;
+
+    // 어린이 가격 계산 (50% 할인)
+    int childPrice = (basePrice * 0.5).round() * childCount;
+
+    // 노약자 가격 계산 (30% 할인)
+    int seniorPrice = (basePrice * 0.7).round() * seniorCount;
+
+    // 총 가격 계산
+    int totalPrice = adultPrice + childPrice + seniorPrice;
+
+    // 왕복인 경우 2배
+    if (isRoundTrip) {
+      totalPrice *= 2;
+    }
+
+    return totalPrice;
+  }
+
+  // 각 승객 유형별 가격을 개별적으로 계산하는 메소드 (필요시 사용)
+  static Map<String, int> getPriceDetails(String departure, String arrival,
+      bool isRoundTrip, int adultCount, int childCount, int seniorCount) {
+    int basePrice = PriceInfo.getPrice(departure, arrival);
+
+    int adultPrice = basePrice * adultCount;
+    int childPrice = (basePrice * 0.5).round() * childCount;
+    int seniorPrice = (basePrice * 0.7).round() * seniorCount;
+
+    if (isRoundTrip) {
+      adultPrice *= 2;
+      childPrice *= 2;
+      seniorPrice *= 2;
+    }
+
+    return {
+      'adult': adultPrice,
+      'child': childPrice,
+      'senior': seniorPrice,
+      'total': adultPrice + childPrice + seniorPrice,
+    };
+  }
+}

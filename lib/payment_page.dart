@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'station_list.dart'; // PriceInfo 클래스가 포함된 파일
 
 class PaymentPage extends StatefulWidget {
   final String departure;
@@ -27,43 +28,35 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  int basePrice = 0;
+  late Map<String, int> priceDetails;
   int totalPrice = 0;
   String? selectedCoupon;
 
   @override
   void initState() {
     super.initState();
-    basePrice = PriceInfo.getPrice(widget.departure, widget.arrival);
-    calculateTotalPrice();
+    calculatePrice();
   }
 
-  void calculateTotalPrice() {
-    int adultPrice = basePrice * widget.adultCount;
-    int childPrice = (basePrice * 0.5).round() * widget.childCount;
-    int seniorPrice = (basePrice * 0.7).round() * widget.seniorCount;
-    totalPrice = adultPrice + childPrice + seniorPrice;
-    if (widget.isRoundTrip) {
-      totalPrice *= 2;
-    }
+  void calculatePrice() {
+    priceDetails = PriceCalculateInfo.getPriceDetails(
+      widget.departure,
+      widget.arrival,
+      widget.isRoundTrip,
+      widget.adultCount,
+      widget.childCount,
+      widget.seniorCount,
+    );
+    totalPrice = priceDetails['total']!;
   }
 
   void applyCoupon(String? coupon) {
     setState(() {
       selectedCoupon = coupon;
-      calculateTotalPrice();
       if (coupon != null) {
-        switch (coupon) {
-          case '10% 할인':
-            totalPrice = (totalPrice * 0.9).round();
-            break;
-          case '15% 할인':
-            totalPrice = (totalPrice * 0.85).round();
-            break;
-          case '20% 할인':
-            totalPrice = (totalPrice * 0.8).round();
-            break;
-        }
+        totalPrice = PriceCalculateInfo.applyCoupon(totalPrice, coupon);
+      } else {
+        calculatePrice();
       }
     });
   }
@@ -90,10 +83,10 @@ class _PaymentPageState extends State<PaymentPage> {
               ]),
               SizedBox(height: 20),
               _buildInfoSection('가격 정보', [
-                '기본 편도 가격: ${basePrice}원',
-                '어른 (${widget.adultCount}명): ${basePrice * widget.adultCount}원',
-                '어린이 (${widget.childCount}명): ${(basePrice * 0.5).round() * widget.childCount}원',
-                '경로 (${widget.seniorCount}명): ${(basePrice * 0.7).round() * widget.seniorCount}원',
+                '기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                '어른 (${widget.adultCount}명): ${priceDetails['adult']}원',
+                '어린이 (${widget.childCount}명): ${priceDetails['child']}원',
+                '경로 (${widget.seniorCount}명): ${priceDetails['senior']}원',
                 if (widget.isRoundTrip) '왕복 요금: ${totalPrice}원',
               ]),
               SizedBox(height: 20),
@@ -146,13 +139,13 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
     );
   }
-}
 
-Widget _buildInfoSection(String title, List<String> items) {
+  Widget _buildInfoSection(String title, List<String> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(title,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         SizedBox(height: 10),
         ...items.map((item) => Text(item)).toList(),
       ],
@@ -160,6 +153,43 @@ Widget _buildInfoSection(String title, List<String> items) {
   }
 }
 
-class PriceInfo {
-  static int getPrice(String departure, String arrival)
+// PriceCalculateInfo 클래스 수정
+class PriceCalculateInfo {
+  static Map<String, int> getPriceDetails(String departure, String arrival,
+      bool isRoundTrip, int adultCount, int childCount, int seniorCount) {
+    int basePrice = PriceInfo.getPrice(departure, arrival);
+
+    int adultPrice = basePrice * adultCount;
+    int childPrice = (basePrice * 0.5).round() * childCount;
+    int seniorPrice = (basePrice * 0.7).round() * seniorCount;
+
+    int totalPrice = adultPrice + childPrice + seniorPrice;
+
+    if (isRoundTrip) {
+      adultPrice *= 2;
+      childPrice *= 2;
+      seniorPrice *= 2;
+      totalPrice *= 2;
+    }
+
+    return {
+      'adult': adultPrice,
+      'child': childPrice,
+      'senior': seniorPrice,
+      'total': totalPrice,
+    };
+  }
+
+  static int applyCoupon(int price, String coupon) {
+    switch (coupon) {
+      case '10% 할인':
+        return (price * 0.9).round();
+      case '15% 할인':
+        return (price * 0.85).round();
+      case '20% 할인':
+        return (price * 0.8).round();
+      default:
+        return price;
+    }
+  }
 }
