@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'payment_page.dart';
 
 class StationListPage extends StatelessWidget {
   final List<String> stations = [
@@ -26,7 +27,7 @@ class StationListPage extends StatelessWidget {
         itemCount: stations.length,
         itemBuilder: (context, index) {
           if (stations[index] == selectedStation) {
-            return Container(); // 이미 선택된 역은 표시하지 않음
+            return Container();
           }
           return ListTile(
             title: Text(stations[index],
@@ -120,6 +121,15 @@ class PriceInfo {
       '부산': 10000,
     },
   };
+  final int originalPrice;
+  final int discountedPrice;
+  final String discountType;
+
+  PriceInfo({
+    required this.originalPrice,
+    required this.discountedPrice,
+    required this.discountType,
+  });
 
   static int getPrice(String departure, String arrival) {
     if (prices.containsKey(departure) &&
@@ -133,51 +143,78 @@ class PriceInfo {
   }
 }
 
-class PriceCalculateInfo {
-  static int getPrice(String departure, String arrival, bool isRoundTrip,
-      int adultCount, int childCount, int seniorCount) {
+class PriceCalculator {
+  static PriceInfo calculatePrice(
+    String departure,
+    String arrival,
+    bool isRoundTrip,
+    int adultCount,
+    int childCount,
+    int seniorCount,
+    String? coupon,
+  ) {
     int basePrice = PriceInfo.getPrice(departure, arrival);
-
-    // 성인 가격 계산
-    int adultPrice = basePrice * adultCount;
-
-    // 어린이 가격 계산 (50% 할인)
-    int childPrice = (basePrice * 0.5).round() * childCount;
-
-    // 노약자 가격 계산 (30% 할인)
-    int seniorPrice = (basePrice * 0.7).round() * seniorCount;
-
-    // 총 가격 계산
-    int totalPrice = adultPrice + childPrice + seniorPrice;
-
-    // 왕복인 경우 2배
+    int totalPrice = 0;
+    totalPrice += basePrice * adultCount;
+    totalPrice += (basePrice * 0.5).round() * childCount;
+    totalPrice += (basePrice * 0.7).round() * seniorCount;
     if (isRoundTrip) {
       totalPrice *= 2;
     }
 
-    return totalPrice;
+    int originalPrice = totalPrice;
+    String discountType = '할인 없음';
+
+    if (coupon != null) {
+      switch (coupon) {
+        case '10% 할인':
+          totalPrice = (totalPrice * 0.9).round();
+          discountType = '10% 할인 쿠폰';
+          break;
+        case '15% 할인':
+          totalPrice = (totalPrice * 0.85).round();
+          discountType = '15% 할인 쿠폰';
+          break;
+        case '20% 할인':
+          totalPrice = (totalPrice * 0.8).round();
+          discountType = '20% 할인 쿠폰';
+          break;
+      }
+    }
+
+    return PriceInfo(
+      originalPrice: originalPrice,
+      discountedPrice: totalPrice,
+      discountType: discountType,
+    );
   }
 
-  // 각 승객 유형별 가격을 개별적으로 계산하는 메소드 (필요시 사용)
-  static Map<String, int> getPriceDetails(String departure, String arrival,
-      bool isRoundTrip, int adultCount, int childCount, int seniorCount) {
+  static Map<String, int> getPriceDetails(
+    String departure,
+    String arrival,
+    bool isRoundTrip,
+    int adultCount,
+    int childCount,
+    int seniorCount,
+  ) {
     int basePrice = PriceInfo.getPrice(departure, arrival);
-
     int adultPrice = basePrice * adultCount;
     int childPrice = (basePrice * 0.5).round() * childCount;
     int seniorPrice = (basePrice * 0.7).round() * seniorCount;
+    int totalPrice = adultPrice + childPrice + seniorPrice;
 
     if (isRoundTrip) {
       adultPrice *= 2;
       childPrice *= 2;
       seniorPrice *= 2;
+      totalPrice *= 2;
     }
 
     return {
       'adult': adultPrice,
       'child': childPrice,
       'senior': seniorPrice,
-      'total': adultPrice + childPrice + seniorPrice,
+      'total': totalPrice,
     };
   }
 }
