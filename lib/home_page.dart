@@ -36,7 +36,10 @@ class _HomePageState extends State<HomePage> {
                         height: 200,
                         color: Colors.grey[300],
                         child: Center(
-                          child: Text('K Rail 로고 위젯'),
+                          child: Image.asset(
+                            'assets/KRAIL_LOGO.jpg', // asset 폴더의 이미지 파일 경로
+                            fit: BoxFit.contain, // 이미지가 컨테이너에 맞게 조정되도록 설정
+                          ),
                         ),
                       ),
                       SizedBox(height: 20),
