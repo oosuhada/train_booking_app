@@ -62,33 +62,33 @@ class _PaymentPageState extends State<PaymentPage> {
       appBar: AppBar(title: Text('결제하기')),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(50.0),
+          padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('예약 정보',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              _buildSectionWithDivider('일정 정보', [
-                '출발역: ${widget.departure}',
-                '도착역: ${widget.arrival}',
-                '날짜: ${DateFormat('yyyy년 MM월 dd일').format(widget.travelDate)}',
-                widget.isRoundTrip ? "왕복" : "편도",
+              SizedBox(height: 20),
+              _buildSectionWithDivider(' 일정 정보', [
+                ' 출발역: ${widget.departure}',
+                ' 도착역: ${widget.arrival}',
+                ' 날짜: ${DateFormat('yyyy년 MM월 dd일').format(widget.travelDate)}',
+                widget.isRoundTrip ? " 왕복" : " 편도",
               ]),
               SizedBox(height: 10),
               _buildSectionWithDivider(' 좌석 정보', [
-                '좌석: ${widget.seatNumbers.join(", ")}',
-                '어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
+                ' 좌석: ${widget.seatNumbers.join(", ")}',
+                ' 어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
               ]),
               SizedBox(height: 10),
               _buildSectionWithDivider(' 가격 정보', [
-                '기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
-                '경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
-                '할인 전 가격: ${priceInfo.originalPrice}원',
+                ' 기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                ' 어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                ' 어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
+                ' 경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
+                ' 할인 전 가격: ${priceInfo.originalPrice}원',
               ]),
-              SizedBox(height: 10),
+              SizedBox(height: 15),
               Text('쿠폰 선택:',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               DropdownButton<String>(
@@ -102,7 +102,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 }).toList(),
                 onChanged: applyCoupon,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 15),
               Text('할인 유형: ${priceInfo.discountType}',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
