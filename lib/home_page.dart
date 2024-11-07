@@ -41,10 +41,8 @@ class _HomePageState extends State<HomePage> {
                         height: 200,
                         color: Colors.grey[300],
                         child: Center(
-                          child: Image.asset(
-                            'asset/KRAIL_LOGO.jpg',
-                            fit: BoxFit.contain,
-                          ),
+                          child: Image.asset('asset/KRAIL_LOGO.jpg',
+                              fit: BoxFit.cover),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -235,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 15.0),
                             child: Text(
-                              '좌석 선택',
+                              '예매하기',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -288,81 +286,88 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDateSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
         Text(
           '날짜 선택',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: departureDate ?? DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 365)),
-                  );
-                  if (picked != null && picked != departureDate) {
-                    setState(() {
-                      departureDate = picked;
-                    });
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    departureDate == null
-                        ? '가는 날'
-                        : DateFormat('yyyy-MM-dd').format(departureDate!),
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-            ),
-            if (isRoundTrip) ...[
-              SizedBox(width: 10),
+        SizedBox(width: 20),
+        Expanded(
+          child: Row(
+            children: [
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
                     final DateTime? picked = await showDatePicker(
                       context: context,
-                      initialDate:
-                          returnDate ?? (departureDate ?? DateTime.now()),
-                      firstDate: departureDate ?? DateTime.now(),
+                      initialDate: departureDate ?? DateTime.now(),
+                      firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(Duration(days: 365)),
                     );
-                    if (picked != null && picked != returnDate) {
+                    if (picked != null && picked != departureDate) {
                       setState(() {
-                        returnDate = picked;
+                        departureDate = picked;
                       });
                     }
                   },
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    height: 40,
+                    padding: EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      returnDate == null
-                          ? '오는 날'
-                          : DateFormat('yyyy-MM-dd').format(returnDate!),
-                      style: TextStyle(fontSize: 16),
+                    child: Center(
+                      child: Text(
+                        departureDate == null
+                            ? '가는 날'
+                            : DateFormat('yyyy-MM-dd').format(departureDate!),
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ),
                   ),
                 ),
               ),
+              if (isRoundTrip) ...[
+                SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate:
+                            returnDate ?? (departureDate ?? DateTime.now()),
+                        firstDate: departureDate ?? DateTime.now(),
+                        lastDate: DateTime.now().add(Duration(days: 365)),
+                      );
+                      if (picked != null && picked != returnDate) {
+                        setState(() {
+                          returnDate = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          returnDate == null
+                              ? '오는 날'
+                              : DateFormat('yyyy-MM-dd').format(returnDate!),
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ],
     );
