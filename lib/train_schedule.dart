@@ -81,18 +81,18 @@ class TrainSchedulePage extends StatelessWidget {
 }
 
 class TrainSchedule {
+  final String trainNumber;
   final String departureStation;
   final String arrivalStation;
   final DateTime departureTime;
   final DateTime arrivalTime;
-  final String trainNumber;
 
   TrainSchedule({
+    required this.trainNumber,
     required this.departureStation,
     required this.arrivalStation,
     required this.departureTime,
     required this.arrivalTime,
-    required this.trainNumber,
   });
 }
 
