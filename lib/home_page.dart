@@ -37,21 +37,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 10),
-                      Container(
-                        height: 200,
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: Image.asset('asset/KRAIL_LOGO.jpg',
-                              fit: BoxFit.cover),
-                        ),
-                      ),
-                      SizedBox(height: 20),
                       Text('승차권 예매',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           )),
-                      SizedBox(height: 20),
+                      SizedBox(height: 15),
+                      _buildDateSelector(),
+                      SizedBox(height: 10),
                       Container(
                         height: 200,
                         decoration: BoxDecoration(
@@ -135,8 +128,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      _buildDateSelector(),
-                      SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -166,20 +157,47 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('편도'),
-                              Switch(
-                                value: isRoundTrip,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isRoundTrip = value;
-                                    if (!isRoundTrip) {
-                                      returnDate = null;
-                                    }
-                                  });
+                              GestureDetector(
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PassengerSelectionPage(
+                                        adultCount: adultCount,
+                                        childCount: childCount,
+                                        seniorCount: seniorCount,
+                                      ),
+                                    ),
+                                  );
+                                  if (result != null) {
+                                    setState(() {
+                                      adultCount = result['adult'];
+                                      childCount = result['child'];
+                                      seniorCount = result['senior'];
+                                    });
+                                  }
                                 },
                               ),
-                              Text('왕복'),
+                              Row(
+                                children: [
+                                  Text('편도'),
+                                  Switch(
+                                    value: isRoundTrip,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isRoundTrip = value;
+                                        if (!isRoundTrip) {
+                                          returnDate = null;
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  Text('왕복'),
+                                ],
+                              ),
                             ],
                           ),
                         ],
@@ -194,40 +212,22 @@ class _HomePageState extends State<HomePage> {
                                   (!isRoundTrip ||
                                       (isRoundTrip && returnDate != null)))
                               ? () {
-                                  List<TrainSchedule> schedules =
-                                      TrainScheduleService.getSchedules(
-                                    departureStation!,
-                                    arrivalStation!,
-                                    departureDate!,
-                                  );
-
-                                  if (schedules.isNotEmpty) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SeatPage(
-                                          departureStation!,
-                                          arrivalStation!,
-                                          adultCount,
-                                          childCount,
-                                          seniorCount,
-                                          isRoundTrip,
-                                          selectedDate: departureDate!,
-                                          departureTime:
-                                              schedules[0].departureTime,
-                                          arrivalTime: schedules[0].arrivalTime,
-                                          trainNumber: schedules[0].trainNumber,
-                                        ),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TrainSchedulePage(
+                                        departureStation: departureStation!,
+                                        arrivalStation: arrivalStation!,
+                                        departureDate: departureDate!,
+                                        returnDate:
+                                            isRoundTrip ? returnDate : null,
+                                        adultCount: adultCount,
+                                        childCount: childCount,
+                                        seniorCount: seniorCount,
+                                        isRoundTrip: isRoundTrip,
                                       ),
-                                    );
-                                  } else {
-                                    // 스케줄이 없을 경우 처리
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content:
-                                              Text('선택한 날짜에 이용 가능한 열차가 없습니다.')),
-                                    );
-                                  }
+                                    ),
+                                  );
                                 }
                               : null,
                           child: Padding(
@@ -248,6 +248,28 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      Text('더보기',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          )),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: Center(
+                            child: Image.asset(
+                          'asset/KRAIL_LOGO.jpg',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )),
                       ),
                     ],
                   ),
@@ -286,88 +308,106 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDateSelector() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '날짜 선택',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(width: 30),
+            Text('가는 날',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            SizedBox(width: 60),
+            Text('오는 날',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            SizedBox(width: 30),
+          ],
         ),
-        SizedBox(width: 20),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: departureDate ?? DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (picked != null && picked != departureDate) {
-                      setState(() {
-                        departureDate = picked;
-                      });
-                    }
-                  },
-                  child: Container(
-                    height: 40,
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        departureDate == null
-                            ? '가는 날'
-                            : DateFormat('yyyy-MM-dd').format(departureDate!),
-                        style: TextStyle(fontSize: 14),
-                      ),
+        SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: departureDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                  );
+                  if (picked != null && picked != departureDate) {
+                    setState(() {
+                      departureDate = picked;
+                      if (returnDate != null &&
+                          returnDate!.isBefore(departureDate!)) {
+                        returnDate = null;
+                        isRoundTrip = false;
+                      }
+                    });
+                  }
+                },
+                child: Container(
+                  height: 40,
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      departureDate == null
+                          ? '선택'
+                          : DateFormat('yyyy-MM-dd').format(departureDate!),
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
                 ),
               ),
-              if (isRoundTrip) ...[
-                SizedBox(width: 10),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate:
-                            returnDate ?? (departureDate ?? DateTime.now()),
-                        firstDate: departureDate ?? DateTime.now(),
-                        lastDate: DateTime.now().add(Duration(days: 365)),
-                      );
-                      if (picked != null && picked != returnDate) {
-                        setState(() {
-                          returnDate = picked;
-                        });
-                      }
-                    },
-                    child: Container(
-                      height: 40,
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          returnDate == null
-                              ? '오는 날'
-                              : DateFormat('yyyy-MM-dd').format(returnDate!),
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ),
+            ), // 2-2칸
+            SizedBox(width: 10),
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  if (departureDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('가는 날을 먼저 선택해주세요.')),
+                    );
+                    return;
+                  }
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: returnDate ?? departureDate!,
+                    firstDate: departureDate!,
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                  );
+                  if (picked != null && picked != returnDate) {
+                    setState(() {
+                      returnDate = picked;
+                      isRoundTrip = true;
+                    });
+                  }
+                },
+                child: Container(
+                  height: 40,
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      returnDate == null
+                          ? '선택'
+                          : DateFormat('yyyy-MM-dd').format(returnDate!),
+                      style: TextStyle(fontSize: 14),
                     ),
                   ),
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -2,6 +2,83 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'seat_page.dart';
+
+class TrainSchedulePage extends StatelessWidget {
+  final String departureStation;
+  final String arrivalStation;
+  final DateTime departureDate;
+  final DateTime? returnDate;
+  final int adultCount;
+  final int childCount;
+  final int seniorCount;
+  final bool isRoundTrip;
+
+  TrainSchedulePage({
+    required this.departureStation,
+    required this.arrivalStation,
+    required this.departureDate,
+    this.returnDate,
+    required this.adultCount,
+    required this.childCount,
+    required this.seniorCount,
+    required this.isRoundTrip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    List<TrainSchedule> schedules = TrainScheduleService.getSchedules(
+      departureStation,
+      arrivalStation,
+      departureDate,
+    );
+
+    return Scaffold(
+      appBar: AppBar(title: Text('기차 시간표')),
+      body: ListView.builder(
+        itemCount: schedules.length,
+        itemBuilder: (context, index) {
+          Duration duration = schedules[index]
+              .arrivalTime
+              .difference(schedules[index].departureTime);
+          String durationStr =
+              '${duration.inHours}시간 ${duration.inMinutes % 60}분';
+
+          return ListTile(
+            title: Text('${schedules[index].trainNumber}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 3),
+                Text(
+                    '출발: ${DateFormat('HH:mm').format(schedules[index].departureTime)}, 도착: ${DateFormat('HH:mm').format(schedules[index].arrivalTime)} 소요시간: $durationStr'),
+              ],
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeatPage(
+                    departureStation,
+                    arrivalStation,
+                    adultCount,
+                    childCount,
+                    seniorCount,
+                    isRoundTrip,
+                    selectedDate: departureDate,
+                    departureTime: schedules[index].departureTime,
+                    arrivalTime: schedules[index].arrivalTime,
+                    trainNumber: schedules[index].trainNumber,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
 
 class TrainSchedule {
   final String departureStation;
