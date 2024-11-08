@@ -260,35 +260,21 @@ class _HomePageState extends State<HomePage> {
                 departureDate != null &&
                 (!isRoundTrip || (isRoundTrip && returnDate != null)))
             ? () {
-                List<TrainSchedule> schedules =
-                    TrainScheduleService.getSchedules(
-                  departureStation!,
-                  arrivalStation!,
-                  departureDate!,
-                );
-                if (schedules.isNotEmpty) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SeatPage(
-                        departureStation!,
-                        arrivalStation!,
-                        adultCount,
-                        childCount,
-                        seniorCount,
-                        isRoundTrip,
-                        selectedDate: departureDate!,
-                        departureTime: schedules[0].departureTime,
-                        arrivalTime: schedules[0].arrivalTime,
-                        trainNumber: schedules[0].trainNumber,
-                      ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TrainSchedulePage(
+                      departureStation: departureStation!,
+                      arrivalStation: arrivalStation!,
+                      departureDate: departureDate!,
+                      returnDate: isRoundTrip ? returnDate : null,
+                      adultCount: adultCount,
+                      childCount: childCount,
+                      seniorCount: seniorCount,
+                      isRoundTrip: isRoundTrip,
                     ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('선택한 날짜에 이용 가능한 열차가 없습니다.')),
-                  );
-                }
+                  ),
+                );
               }
             : null,
         child: Padding(
