@@ -46,23 +46,17 @@ class _SeatPageState extends State<SeatPage>
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-    schedules = [
-      TrainSchedule(
-        trainNumber: widget.trainNumber,
-        departureTime: widget.departureTime,
-        arrivalTime: widget.arrivalTime,
-        departureStation: '',
-        arrivalStation: '',
-      )
-    ];
+    schedules = TrainScheduleService.getSchedules(
+      widget.departure,
+      widget.arrival,
+      selectedDate,
+    );
 
-    // 애니메이션 컨트롤러 초기화
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
-    // 애니메이션 설정
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
@@ -70,8 +64,6 @@ class _SeatPageState extends State<SeatPage>
       parent: _controller,
       curve: Curves.easeOut,
     ));
-
-    // 기타 초기화 코드...
   }
 
   @override
@@ -87,7 +79,7 @@ class _SeatPageState extends State<SeatPage>
         return AlertDialog(
           title: Text('알림'),
           content: Text(message),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: Text('확인'),
               onPressed: () {
@@ -128,39 +120,64 @@ class _SeatPageState extends State<SeatPage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
-                        onPressed: () {
-                          setState(() {
-                            selectedDate =
-                                selectedDate.subtract(Duration(days: 1));
-                            schedules = TrainScheduleService.getSchedules(
-                              widget.departure,
-                              widget.arrival,
-                              selectedDate,
-                            );
-                            currentScheduleIndex = 0;
-                          });
-                        },
+                      Column(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_back_ios, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                selectedDate =
+                                    selectedDate.subtract(Duration(days: 1));
+                                schedules = TrainScheduleService.getSchedules(
+                                  widget.departure,
+                                  widget.arrival,
+                                  selectedDate,
+                                );
+                                currentScheduleIndex = 0;
+                              });
+                            },
+                          ),
+                          Text(
+                            '이전날',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
                       ),
-                      Text(
-                        DateFormat('yyyy년 MM월 dd일').format(selectedDate),
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      Column(
+                        children: [
+                          Text(
+                            DateFormat('dd').format(selectedDate),
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            DateFormat('yy년 MM월').format(selectedDate),
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          setState(() {
-                            selectedDate = selectedDate.add(Duration(days: 1));
-                            schedules = TrainScheduleService.getSchedules(
-                              widget.departure,
-                              widget.arrival,
-                              selectedDate,
-                            );
-                            currentScheduleIndex = 0;
-                          });
-                        },
+                      Column(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_forward_ios, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                selectedDate =
+                                    selectedDate.add(Duration(days: 1));
+                                schedules = TrainScheduleService.getSchedules(
+                                  widget.departure,
+                                  widget.arrival,
+                                  selectedDate,
+                                );
+                                currentScheduleIndex = 0;
+                              });
+                            },
+                          ),
+                          Text(
+                            '다음날',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -173,7 +190,7 @@ class _SeatPageState extends State<SeatPage>
                         icon: Icon(Icons.arrow_back_ios),
                         onPressed: currentScheduleIndex > 0
                             ? () => _changeTrainSchedule(-1)
-                            : null,
+                            : () => _showNoTrainAlert('이전 열차가 없습니다.'),
                         color:
                             currentScheduleIndex > 0 ? null : Colors.grey[300],
                       ),
@@ -194,7 +211,7 @@ class _SeatPageState extends State<SeatPage>
                         icon: Icon(Icons.arrow_forward_ios),
                         onPressed: currentScheduleIndex < schedules.length - 1
                             ? () => _changeTrainSchedule(1)
-                            : null,
+                            : () => _showNoTrainAlert('다음 열차가 없습니다.'),
                         color: currentScheduleIndex < schedules.length - 1
                             ? null
                             : Colors.grey[300],
