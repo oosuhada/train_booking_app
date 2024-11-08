@@ -42,10 +42,10 @@ class _HomePageState extends State<HomePage> {
                 _buildPassengerAndTripTypeSelector(),
                 SizedBox(height: 20),
                 _buildBookButton(),
-                SizedBox(height: 25),
+                SizedBox(height: 35),
                 Text('더보기',
                     style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 SizedBox(height: 15),
                 _buildLogoContainer(),
               ],
