@@ -11,12 +11,8 @@ class SeatPage extends StatefulWidget {
   final int seniorCount;
   final bool isRoundTrip;
   final DateTime selectedDate;
-  final DateTime departureTime;
-  final DateTime arrivalTime;
-  final String trainNumber;
-  final bool isReturn;
+  final TrainSchedule departureSchedule;
   final TrainSchedule? returnSchedule;
-  final DateTime? returnDate;
 
   SeatPage({
     required this.departureStation,
@@ -26,12 +22,8 @@ class SeatPage extends StatefulWidget {
     required this.seniorCount,
     required this.isRoundTrip,
     required this.selectedDate,
-    required this.departureTime,
-    required this.arrivalTime,
-    required this.trainNumber,
-    required this.isReturn,
+    required this.departureSchedule,
     this.returnSchedule,
-    this.returnDate,
   });
 
   @override
@@ -47,27 +39,22 @@ class _SeatPageState extends State<SeatPage>
   late DateTime selectedDate;
   late List<TrainSchedule> schedules;
   int currentScheduleIndex = 0;
-  bool isSelectingReturnSeat = false;
+  bool isSelectingReturn = false;
+  Set<String> selectedReturnSeats = {};
 
   @override
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-    schedules = [
-      TrainSchedule(
-        trainNumber: widget.trainNumber,
-        departureStation: widget.departureStation,
-        arrivalStation: widget.arrivalStation,
-        departureTime: widget.departureTime,
-        arrivalTime: widget.arrivalTime,
-      )
-    ];
-
+    schedules = TrainScheduleService.getSchedules(
+      widget.departureStation,
+      widget.arrivalStation,
+      selectedDate,
+    );
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
@@ -75,139 +62,269 @@ class _SeatPageState extends State<SeatPage>
       parent: _controller,
       curve: Curves.easeOut,
     ));
-
-    _controller.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isSelectingReturnSeat ? '도착편 좌석 선택' : '출발편 좌석 선택'),
-      ),
-      body: Column(
-        children: [
-          // 열차 정보 위젯
-          Container(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${widget.trainNumber}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${DateFormat('HH:mm').format(widget.departureTime)} - ${DateFormat('HH:mm').format(widget.arrivalTime)}',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-
-          // 좌석 선택 UI
-          Expanded(
-            child: SlideTransition(
-              position: _offsetAnimation,
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  childAspectRatio: 1,
-                ),
-                itemCount: seats.length * seats[0].length,
-                itemBuilder: (context, index) {
-                  int row = index ~/ seats[0].length;
-                  int col = index % seats[0].length;
-                  return GestureDetector(
-                    onTap: () => _toggleSeat(row, col),
-                    child: Container(
-                      margin: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: seats[row][col] ? Colors.blue : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Center(
-                        child:
-                            Text('${row + 1}${String.fromCharCode(65 + col)}'),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // 선택된 좌석 정보
-          Container(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              '선택된 좌석: ${selectedSeats.join(", ")}',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // 왕복 여정 관련 버튼
-          if (widget.isRoundTrip && !isSelectingReturnSeat)
-            ElevatedButton(
-              child: Text('도착편 좌석 선택'),
-              onPressed: () {
-                setState(() {
-                  isSelectingReturnSeat = true;
-                  // 도착편 스케줄로 업데이트
-                  schedules = TrainScheduleService.getSchedules(
-                    widget.arrivalStation,
-                    widget.departureStation,
-                    widget.returnDate!,
-                  );
-                  currentScheduleIndex = 0;
-                  seats = List.generate(20, (_) => List.filled(4, false));
-                  selectedSeats.clear();
-                });
-                _controller.forward(from: 0.0);
-              },
-            ),
-
-          if (isSelectingReturnSeat || !widget.isRoundTrip)
-            ElevatedButton(
-              child: Text('예약 완료'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentPage(
-                      departure: widget.departureStation,
-                      arrival: widget.arrivalStation,
-                      seatNumbers: selectedSeats.toList(),
-                      isRoundTrip: widget.isRoundTrip,
-                      travelDate: selectedDate,
-                      adultCount: widget.adultCount,
-                      childCount: widget.childCount,
-                      seniorCount: widget.seniorCount,
-                    ),
-                  ),
-                );
-              },
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _toggleSeat(int row, int col) {
-    setState(() {
-      seats[row][col] = !seats[row][col];
-      String seatName = '${row + 1}${String.fromCharCode(65 + col)}';
-      if (seats[row][col]) {
-        selectedSeats.add(seatName);
-      } else {
-        selectedSeats.remove(seatName);
-      }
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _showNoTrainAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('알림'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _changeTrainSchedule(int direction) {
+    setState(() {
+      int newIndex = currentScheduleIndex + direction;
+      if (newIndex >= 0 && newIndex < schedules.length) {
+        currentScheduleIndex = newIndex;
+      } else {
+        _showNoTrainAlert(direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.');
+      }
+    });
+  }
+
+  void _selectSeat(int row, int col) {
+    setState(() {
+      if (seats[row][col]) {
+        seats[row][col] = false;
+        (isSelectingReturn ? selectedReturnSeats : selectedSeats)
+            .remove('${row + 1}${String.fromCharCode(65 + col)}');
+      } else if ((isSelectingReturn ? selectedReturnSeats : selectedSeats)
+              .length <
+          widget.adultCount + widget.childCount + widget.seniorCount) {
+        seats[row][col] = true;
+        (isSelectingReturn ? selectedReturnSeats : selectedSeats)
+            .add('${row + 1}${String.fromCharCode(65 + col)}');
+      }
+
+      if (selectedSeats.isNotEmpty || selectedReturnSeats.isNotEmpty) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  void _proceedToNextStep() {
+    if (widget.isRoundTrip && !isSelectingReturn) {
+      setState(() {
+        isSelectingReturn = true;
+        seats = List.generate(20, (_) => List.filled(4, false));
+        selectedReturnSeats.clear();
+        selectedDate = selectedDate.add(Duration(days: 1));
+        schedules = TrainScheduleService.getSchedules(
+          widget.arrivalStation,
+          widget.departureStation,
+          selectedDate,
+        );
+        currentScheduleIndex = 0;
+      });
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentPage(
+            departure: widget.departureStation,
+            arrival: widget.arrivalStation,
+            seatNumbers: selectedSeats.toList(),
+            // returnSeatNumbers와 returnDate는 새로 추가된 매개변수입니다.
+            // 이 매개변수들이 PaymentPage에 정의되어 있는지 확인해주세요.
+            returnSeatNumbers: selectedReturnSeats.toList(),
+            returnDate: isSelectingReturn ? selectedDate : null,
+            isRoundTrip: widget.isRoundTrip,
+            travelDate: widget.selectedDate,
+            adultCount: widget.adultCount,
+            childCount: widget.childCount,
+            seniorCount: widget.seniorCount,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('좌석 선택')),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 10),
+                  // 열차 정보 위젯
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: currentScheduleIndex > 0
+                              ? () => _changeTrainSchedule(-1)
+                              : null,
+                          color: currentScheduleIndex > 0
+                              ? null
+                              : Colors.grey[300],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              schedules[currentScheduleIndex].trainNumber,
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${DateFormat('HH:mm').format(schedules[currentScheduleIndex].departureTime)} - ${DateFormat('HH:mm').format(schedules[currentScheduleIndex].arrivalTime)}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: currentScheduleIndex < schedules.length - 1
+                              ? () => _changeTrainSchedule(1)
+                              : null,
+                          color: currentScheduleIndex < schedules.length - 1
+                              ? null
+                              : Colors.grey[300],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // 좌석 선택 UI
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 5,
+                      childAspectRatio: 1,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
+                    ),
+                    itemCount: seats.length * 5,
+                    itemBuilder: (context, index) {
+                      if (index % 5 == 2) {
+                        int row = index ~/ 5 + 1;
+                        return Center(
+                          child: Text(row.toString(),
+                              style: TextStyle(fontSize: 18)),
+                        );
+                      }
+                      int row = index ~/ 5;
+                      int col = index % 5 > 2 ? index % 5 - 1 : index % 5;
+                      if (col >= seats[row].length) return SizedBox();
+                      return GestureDetector(
+                        onTap: () => _selectSeat(row, col),
+                        child: Container(
+                          margin: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: seats[row][col]
+                                ? Colors.purple
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SlideTransition(
+              position: _offsetAnimation,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '선택한 좌석: ${(isSelectingReturn ? selectedReturnSeats : selectedSeats).join(", ")}',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '어른: ${widget.adultCount}, 어린이: ${widget.childCount}, 경로: ${widget.seniorCount}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: (isSelectingReturn
+                                      ? selectedReturnSeats
+                                      : selectedSeats)
+                                  .length ==
+                              widget.adultCount +
+                                  widget.childCount +
+                                  widget.seniorCount
+                          ? _proceedToNextStep
+                          : null,
+                      child: Text(
+                        isSelectingReturn ? '예매 하기' : '다음',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

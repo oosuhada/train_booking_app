@@ -27,7 +27,9 @@ class TrainSchedulePage extends StatefulWidget {
   _TrainSchedulePageState createState() => _TrainSchedulePageState();
 }
 
-class _TrainSchedulePageState extends State<TrainSchedulePage> {
+class _TrainSchedulePageState extends State<TrainSchedulePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   late List<TrainSchedule> departureSchedules;
   late List<TrainSchedule> returnSchedules;
   bool isShowingReturn = false;
@@ -37,6 +39,10 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(
+      length: widget.isRoundTrip ? 2 : 1,
+      vsync: this,
+    );
     _loadSchedules();
   }
 
@@ -67,12 +73,11 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
     });
 
     if (widget.isRoundTrip && !isReturn) {
-      // 출발편 선택 후 도착편 선택으로 전환
       setState(() {
         isShowingReturn = true;
       });
+      _tabController.animateTo(1); // 도착편 탭으로 전환
     } else {
-      // 도착편 선택 완료 또는 편도 여정
       _navigateToSeatSelection();
     }
   }
@@ -89,10 +94,7 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
           selectedDate: widget.departureDate,
-          departureTime: selectedDepartureSchedule!.departureTime,
-          arrivalTime: selectedDepartureSchedule!.arrivalTime,
-          trainNumber: selectedDepartureSchedule!.trainNumber,
-          isReturn: false,
+          departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
         ),
       ),
@@ -101,24 +103,23 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: widget.isRoundTrip ? 2 : 1,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('열차 시간표'),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: '출발편'),
-              if (widget.isRoundTrip) Tab(text: '도착편'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildScheduleList(departureSchedules, false),
-            if (widget.isRoundTrip) _buildScheduleList(returnSchedules, true),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('열차 시간표'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: '출발편'),
+            if (widget.isRoundTrip) Tab(text: '도착편'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildScheduleList(departureSchedules, false),
+          if (widget.isRoundTrip) _buildScheduleList(returnSchedules, true),
+        ],
       ),
     );
   }

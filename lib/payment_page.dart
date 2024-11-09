@@ -6,6 +6,8 @@ class PaymentPage extends StatefulWidget {
   final String departure;
   final String arrival;
   final List<String> seatNumbers;
+  final List<String> returnSeatNumbers;
+  final DateTime? returnDate;
   final bool isRoundTrip;
   final DateTime travelDate;
   final int adultCount;
@@ -16,6 +18,8 @@ class PaymentPage extends StatefulWidget {
     required this.departure,
     required this.arrival,
     required this.seatNumbers,
+    required this.returnSeatNumbers,
+    this.returnDate,
     required this.isRoundTrip,
     required this.travelDate,
     required this.adultCount,
