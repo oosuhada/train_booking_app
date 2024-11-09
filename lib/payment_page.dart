@@ -81,9 +81,9 @@ class _PaymentPageState extends State<PaymentPage> {
               _buildSectionWithDivider('일정 정보', [
                 '출발역: ${widget.departure}',
                 '도착역: ${widget.arrival}',
-                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.travelDate)})',
+                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule.departureTime)})',
                 if (widget.isRoundTrip && widget.returnSchedule != null)
-                  '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.returnDate!)})',
+                  '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule.departureTime!)})',
                 widget.isRoundTrip ? "왕복" : "편도",
               ]),
               SizedBox(height: 10),
