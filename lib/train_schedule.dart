@@ -1,10 +1,8 @@
-// ignore_for_file: unnecessary_null_comparison
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'seat_page.dart';
 
-class TrainSchedulePage extends StatelessWidget {
+class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
   final String arrivalStation;
   final DateTime departureDate;
@@ -26,53 +24,89 @@ class TrainSchedulePage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    List<TrainSchedule> schedules = TrainScheduleService.getSchedules(
-      departureStation,
-      arrivalStation,
-      departureDate,
-    );
+  _TrainSchedulePageState createState() => _TrainSchedulePageState();
+}
 
+class _TrainSchedulePageState extends State<TrainSchedulePage> {
+  late List<TrainSchedule> departureSchedules;
+  late List<TrainSchedule> returnSchedules;
+  bool isSelectingReturn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    departureSchedules = TrainScheduleService.getSchedules(
+      widget.departureStation,
+      widget.arrivalStation,
+      widget.departureDate,
+    );
+    if (widget.isRoundTrip && widget.returnDate != null) {
+      returnSchedules = TrainScheduleService.getSchedules(
+        widget.arrivalStation,
+        widget.departureStation,
+        widget.returnDate!,
+      );
+    }
+  }
+
+  void _selectSchedule(TrainSchedule schedule) {
+    if (!widget.isRoundTrip || isSelectingReturn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SeatPage(
+            widget.departureStation,
+            widget.arrivalStation,
+            widget.adultCount,
+            widget.childCount,
+            widget.seniorCount,
+            widget.isRoundTrip,
+            selectedDate:
+                isSelectingReturn ? widget.returnDate! : widget.departureDate,
+            departureTime: schedule.departureTime,
+            arrivalTime: schedule.arrivalTime,
+            trainNumber: schedule.trainNumber,
+            isReturn: isSelectingReturn,
+          ),
+        ),
+      );
+    } else {
+      setState(() {
+        isSelectingReturn = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('기차 시간표')),
+      appBar: AppBar(
+        title: Text(isSelectingReturn ? '도착편 열차 시간표' : '출발편 열차 시간표'),
+      ),
       body: ListView.builder(
-        itemCount: schedules.length,
+        itemCount: isSelectingReturn
+            ? returnSchedules.length
+            : departureSchedules.length,
         itemBuilder: (context, index) {
-          Duration duration = schedules[index]
-              .arrivalTime
-              .difference(schedules[index].departureTime);
+          TrainSchedule schedule = isSelectingReturn
+              ? returnSchedules[index]
+              : departureSchedules[index];
+          Duration duration =
+              schedule.arrivalTime.difference(schedule.departureTime);
           String durationStr =
               '${duration.inHours}시간 ${duration.inMinutes % 60}분';
 
           return ListTile(
-            title: Text('${schedules[index].trainNumber}'),
+            title: Text('${schedule.trainNumber}'),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 3),
                 Text(
-                    '출발: ${DateFormat('HH:mm').format(schedules[index].departureTime)}, 도착: ${DateFormat('HH:mm').format(schedules[index].arrivalTime)} 소요시간: $durationStr'),
+                    '출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, 도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} 소요시간: $durationStr'),
               ],
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeatPage(
-                    departureStation,
-                    arrivalStation,
-                    adultCount,
-                    childCount,
-                    seniorCount,
-                    isRoundTrip,
-                    selectedDate: departureDate,
-                    departureTime: schedules[index].departureTime,
-                    arrivalTime: schedules[index].arrivalTime,
-                    trainNumber: schedules[index].trainNumber,
-                  ),
-                ),
-              );
-            },
+            onTap: () => _selectSchedule(schedule),
           );
         },
       ),
