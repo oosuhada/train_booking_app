@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'train_schedule.dart';
 
 class SeatPage extends StatefulWidget {
-  final String departure;
-  final String arrival;
+  final String departureStation;
+  final String arrivalStation;
   final int adultCount;
   final int childCount;
   final int seniorCount;
@@ -14,10 +14,12 @@ class SeatPage extends StatefulWidget {
   final DateTime departureTime;
   final DateTime arrivalTime;
   final String trainNumber;
+  final bool isReturn;
+  final TrainSchedule? returnSchedule; // 추가된 부분
 
   SeatPage(
-    this.departure,
-    this.arrival,
+    this.departureStation,
+    this.arrivalStation,
     this.adultCount,
     this.childCount,
     this.seniorCount,
@@ -26,6 +28,8 @@ class SeatPage extends StatefulWidget {
     required this.departureTime,
     required this.arrivalTime,
     required this.trainNumber,
+    required this.isReturn,
+    this.returnSchedule, // 추가된 부분
   });
 
   @override
@@ -106,7 +110,7 @@ class _SeatPageState extends State<SeatPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('좌석 선택')),
+      appBar: AppBar(title: Text(widget.isReturn ? '도착편 좌석 선택' : '출발편 좌석 선택')),
       body: Stack(
         children: [
           SingleChildScrollView(
