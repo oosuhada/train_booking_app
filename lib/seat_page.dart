@@ -60,20 +60,11 @@ class _SeatPageState extends State<SeatPage>
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-    schedules = [widget.selectedSchedule];
+    // 출발편/도착편에 따라 적절한 스케줄 설정
+    schedules = [
+      isSelectingReturn ? widget.returnSchedule! : widget.departureSchedule
+    ];
     currentScheduleIndex = 0;
-
-    // 선택된 스케줄의 인덱스를 정확히 찾기
-    currentScheduleIndex = schedules.indexWhere((schedule) =>
-        schedule.trainNumber == widget.trainNumber &&
-        schedule.departureTime.hour == widget.departureTime.hour &&
-        schedule.departureTime.minute == widget.departureTime.minute);
-
-    // 인덱스를 찾지 못한 경우에만 기본값 0으로 설정
-    if (currentScheduleIndex == -1) {
-      currentScheduleIndex = 0;
-    }
-
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,

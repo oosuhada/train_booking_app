@@ -117,23 +117,24 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     setState(() {
       if (isReturn) {
         selectedReturnSchedule = schedule;
+        _navigateToSeatSelection(isReturn: true);
       } else {
         selectedDepartureSchedule = schedule;
+        if (!widget.isRoundTrip) {
+          _navigateToSeatSelection(isReturn: false);
+        } else {
+          isShowingReturn = true;
+          _tabController.animateTo(1);
+        }
       }
     });
-
-    if (widget.isRoundTrip && !isReturn) {
-      setState(() {
-        isShowingReturn = true;
-      });
-      _tabController.animateTo(1);
-    } else {
-      _navigateToSeatSelection();
-    }
   }
 
-  void _navigateToSeatSelection() {
-    if (selectedDepartureSchedule == null) return;
+  void _navigateToSeatSelection({bool isReturn = false}) {
+    TrainSchedule selectedSchedule =
+        isReturn ? selectedReturnSchedule! : selectedDepartureSchedule!;
+    DateTime selectedDate =
+        isReturn ? widget.returnDate! : widget.departureDate;
 
     Navigator.push(
       context,
@@ -141,19 +142,19 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
         builder: (context) => SeatPage(
           departure: widget.departureStation,
           arrival: widget.arrivalStation,
-          departureStation: selectedDepartureSchedule!.departureStation,
-          arrivalStation: selectedDepartureSchedule!.arrivalStation,
+          departureStation: selectedSchedule.departureStation,
+          arrivalStation: selectedSchedule.arrivalStation,
           adultCount: widget.adultCount,
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
-          selectedDate: widget.departureDate,
-          departureTime: selectedDepartureSchedule!.departureTime,
-          arrivalTime: selectedDepartureSchedule!.arrivalTime,
-          trainNumber: selectedDepartureSchedule!.trainNumber,
+          selectedDate: selectedDate,
+          departureTime: selectedSchedule.departureTime,
+          arrivalTime: selectedSchedule.arrivalTime,
+          trainNumber: selectedSchedule.trainNumber,
           departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
-          selectedSchedule: selectedDepartureSchedule!,
+          selectedSchedule: selectedSchedule,
           selectedDepartureDate: widget.departureDate,
           selectedReturnDate: widget.returnDate,
         ),
