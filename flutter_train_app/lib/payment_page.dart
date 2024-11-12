@@ -11,11 +11,7 @@ class PaymentPage extends StatefulWidget {
     required this.departure,
     required this.arrival,
     required this.seatNumber,
-    required List<String> seatNumbers,
-    required bool isRoundTrip,
   });
-
-  get isRoundTrip => null;
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -99,8 +95,8 @@ class _PaymentPageState extends State<PaymentPage> {
             SizedBox(height: 20),
             Text('출발역: ${widget.departure}'),
             Text('도착역: ${widget.arrival}'),
-            Text('좌석: ${widget.seatNumber}'),
-            Text(widget.isRoundTrip ? "왕복" : "편도"),
+            Text('좌석: ${widget.seatNumbers.join(", ")}'),
+            Text('${widget.isRoundTrip ? "왕복" : "편도"}'),
             SizedBox(height: 20),
             Text('기본 가격: $basePrice원'),
             SizedBox(height: 20),
