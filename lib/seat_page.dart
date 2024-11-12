@@ -131,7 +131,9 @@ class _SeatPageState extends State<SeatPage> {
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: seats[0].length + 1,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1, // 1로 변경하여 정사각형 비율 유지
+                  crossAxisSpacing: 4, // 가로 간격 추가
+                  mainAxisSpacing: 4, // 세로 간격 추가
                 ),
                 itemCount: seats.length * (seats[0].length + 1),
                 itemBuilder: (context, index) {

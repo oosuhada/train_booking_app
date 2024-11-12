@@ -19,167 +19,198 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('K Rail')),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 20), // 여백 추가
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('승차권 예매',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  Row(
+        appBar: AppBar(title: Text('K Rail')),
+        body: Container(
+          color: Colors.grey[200],
+          child: Column(children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('편도'),
-                      Switch(
-                        value: isRoundTrip,
-                        onChanged: (value) {
-                          setState(() {
-                            isRoundTrip = value;
-                          });
-                        },
-                      ),
-                      Text('왕복'),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: Text(departureStation ?? '출발역',
-                          textAlign: TextAlign.center)),
-                  Icon(Icons.arrow_forward),
-                  Expanded(
-                      child: Text(arrivalStation ?? '도착역',
-                          textAlign: TextAlign.center)),
-                ],
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          departureStation ?? '선택',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                      SizedBox(height: 10), // 여백을 절반으로 줄임
+                      Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: Text('K Rail 로고 위젯'),
                         ),
                       ),
-                    ),
-                    Container(
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          arrivalStation ?? '선택',
+                      SizedBox(height: 20),
+                      Text('승차권 예매',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 20),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 20,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: IconButton(
+                                  icon: Icon(Icons.swap_horiz),
+                                  onPressed: () {
+                                    setState(() {
+                                      final temp = departureStation;
+                                      departureStation = arrivalStation;
+                                      arrivalStation = temp;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                  child: _buildStationSelector(
+                                      '출발역', departureStation, () async {
+                                    final selectedStation =
+                                        await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => StationListPage(
+                                            selectedStation: arrivalStation),
+                                      ),
+                                    );
+                                    if (selectedStation != null) {
+                                      setState(() {
+                                        departureStation = selectedStation;
+                                      });
+                                    }
+                                  }),
+                                ),
+                                Container(
+                                  width: 2,
+                                  height: 50,
+                                  color: Colors.grey[400],
+                                ),
+                                Expanded(
+                                  child: _buildStationSelector(
+                                      '도착역', arrivalStation, () async {
+                                    final selectedStation =
+                                        await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => StationListPage(
+                                            selectedStation: departureStation),
+                                      ),
+                                    );
+                                    if (selectedStation != null) {
+                                      setState(() {
+                                        arrivalStation = selectedStation;
+                                      });
+                                    }
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                '인원 선택',
-                style: TextStyle(fontSize: 14, color: Colors.purple),
-              ),
-              GestureDetector(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PassengerSelectionPage(
-                        adultCount: adultCount,
-                        childCount: childCount,
-                        seniorCount: seniorCount,
-                      ),
-                    ),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      adultCount = result['adult'];
-                      childCount = result['child'];
-                      seniorCount = result['senior'];
-                    });
-                  }
-                },
-                child: Text(
-                  '어른 $adultCount명${childCount > 0 ? ', 어린이 $childCount명' : ''}${seniorCount > 0 ? ', 경로 $seniorCount명' : ''}',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed:
-                      (departureStation != null && arrivalStation != null)
-                          ? () {
-                              Navigator.push(
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => SeatPage(
-                                    departureStation!,
-                                    arrivalStation!,
-                                    adultCount,
-                                    childCount,
-                                    seniorCount,
-                                    isRoundTrip,
+                                  builder: (context) => PassengerSelectionPage(
+                                    adultCount: adultCount,
+                                    childCount: childCount,
+                                    seniorCount: seniorCount,
                                   ),
                                 ),
                               );
-                            }
-                          : null,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15.0),
-                    child: Text(
-                      '좌석 선택',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                              if (result != null) {
+                                setState(() {
+                                  adultCount = result['adult'];
+                                  childCount = result['child'];
+                                  seniorCount = result['senior'];
+                                });
+                              }
+                            },
+                            child: Text(
+                              '인원 선택: 어른 $adultCount명${childCount > 0 ? ', 어린이 $childCount명' : ''}${seniorCount > 0 ? ', 경로 $seniorCount명' : ''}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text('편도'),
+                              Switch(
+                                value: isRoundTrip,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isRoundTrip = value;
+                                  });
+                                },
+                              ),
+                              Text('왕복'),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        (departureStation != null && arrivalStation != null)
-                            ? Colors.purple
-                            : Colors.grey,
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: (departureStation != null &&
+                                  arrivalStation != null)
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SeatPage(
+                                        departureStation!,
+                                        arrivalStation!,
+                                        adultCount,
+                                        childCount,
+                                        seniorCount,
+                                        isRoundTrip,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15.0),
+                            child: Text(
+                              '좌석 선택',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              Container(
-                height: 200,
-                color: Colors.grey[300],
-                child: Center(
-                  child: Text('이미지 위젯 공간'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          ]),
+        ));
   }
 
   Widget _buildStationSelector(String label, String? station, Function onTap) {
@@ -198,11 +229,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           SizedBox(height: 10),
-          FittedBox(
-            child: Text(
-              station ?? '선택',
-              style: TextStyle(fontSize: 40),
-            ),
+          Text(
+            station ?? '선택',
+            style: TextStyle(fontSize: 40),
           ),
         ],
       ),
