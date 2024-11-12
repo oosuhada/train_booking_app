@@ -3,8 +3,6 @@ import 'station_list.dart'; // 기차역 리스트 페이지 import
 import 'seat_page.dart'; // 좌석 선택 페이지 import
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -17,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('기차 예매'),
+        title: Text('기차 예매'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -89,13 +87,14 @@ class _HomePageState extends State<HomePage> {
                     }
                   : null, // 출발역과 도착역이 모두 선택되지 않으면 비활성화
               style: ElevatedButton.styleFrom(
-                iconColor: Colors.purple, // 버튼 색상
+                backgroundColor: Colors.purple, // 버튼 색상
+
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20), // 모서리 둥글기
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15.0),
                 child: Text(
                   '좌석 선택',
                   style: TextStyle(
@@ -121,12 +120,12 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(label,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey)),
-          const SizedBox(height: 10),
-          Text(station ?? '선택', style: const TextStyle(fontSize: 40)),
+          SizedBox(height: 10),
+          Text(station ?? '선택', style: TextStyle(fontSize: 40)),
         ],
       ),
     );
