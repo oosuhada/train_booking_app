@@ -128,7 +128,8 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.bold,
                   color: Colors.grey)),
           SizedBox(height: 10),
-          Text(station ?? '선택', style: TextStyle(fontSize: 40)),
+          FittedBox(
+              child: Text(station ?? '선택', style: TextStyle(fontSize: 40))),
         ],
       ),
     );
