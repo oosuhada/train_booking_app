@@ -10,6 +10,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? departureStation; // 출발역 저장 변수
   String? arrivalStation; // 도착역 저장 변수
+  bool isRoundTrip = false;
+  int passengerCount = 1;
 
   @override
   Widget build(BuildContext context) {

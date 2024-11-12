@@ -22,10 +22,12 @@ class _PaymentPageState extends State<PaymentPage> {
   int discountedPrice = 0;
   String? selectedCoupon;
 
-  @override
   void initState() {
     super.initState();
     basePrice = PriceInfo.getPrice(widget.departure, widget.arrival);
+    if (widget.isRoundTrip) {
+      basePrice *= 2;
+    }
     discountedPrice = basePrice;
   }
 
@@ -93,7 +95,8 @@ class _PaymentPageState extends State<PaymentPage> {
             SizedBox(height: 20),
             Text('출발역: ${widget.departure}'),
             Text('도착역: ${widget.arrival}'),
-            Text('좌석: ${widget.seatNumber}'),
+            Text('좌석: ${widget.seatNumbers.join(", ")}'),
+            Text('${widget.isRoundTrip ? "왕복" : "편도"}'),
             SizedBox(height: 20),
             Text('기본 가격: $basePrice원'),
             SizedBox(height: 20),
