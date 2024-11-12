@@ -25,7 +25,9 @@ class _SeatPageState extends State<SeatPage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
+                  // 출발역과 도착역을 표시하는 Row
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
