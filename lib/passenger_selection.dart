@@ -67,18 +67,6 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('인원 선택'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, {
-                'adult': _adultCount,
-                'child': _childCount,
-                'senior': _seniorCount,
-              });
-            },
-            child: Text('완료', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -103,6 +91,34 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
               '만 65세 이상',
               _seniorCount,
               (newCount) => setState(() => _seniorCount = newCount),
+            ),
+            Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('취소'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, {
+                      'adult': _adultCount,
+                      'child': _childCount,
+                      'senior': _seniorCount,
+                    });
+                  },
+                  child: Text('확인'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
