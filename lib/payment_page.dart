@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'station_list.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -54,37 +53,6 @@ class _PaymentPageState extends State<PaymentPage> {
     });
   }
 
-  Future<void> initializePaymentSheet() async {
-    try {
-      // 여기에서 서버로부터 결제 정보를 받아와야 합니다.
-      // 이 예시에서는 하드코딩된 값을 사용합니다.
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: 'your_payment_intent_client_secret',
-          merchantDisplayName: '기차 예매 서비스',
-          style: ThemeMode.dark,
-        ),
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> displayPaymentSheet(BuildContext context) async {
-    try {
-      await Stripe.instance.presentPaymentSheet();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('결제가 완료되었습니다!')),
-      );
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('결제 중 오류가 발생했습니다.')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,10 +101,7 @@ class _PaymentPageState extends State<PaymentPage> {
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(20),
         child: ElevatedButton(
-          onPressed: () async {
-            await initializePaymentSheet();
-            await displayPaymentSheet(context);
-          },
+          onPressed: () async {},
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Row(
