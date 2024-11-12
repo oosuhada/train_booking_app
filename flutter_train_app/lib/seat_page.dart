@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../payment_page.dart';
+import 'payment_page.dart';
 
 class SeatPage extends StatefulWidget {
   final String departure;
@@ -8,7 +7,12 @@ class SeatPage extends StatefulWidget {
   final int passengerCount;
   final bool isRoundTrip;
 
-  SeatPage(this.departure, this.arrival, this.passengerCount, this.isRoundTrip);
+  SeatPage({
+    required this.departure,
+    required this.arrival,
+    required this.passengerCount,
+    required this.isRoundTrip,
+  });
 
   @override
   _SeatPageState createState() => _SeatPageState();

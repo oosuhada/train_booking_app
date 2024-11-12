@@ -115,8 +115,8 @@ class _HomePageState extends State<HomePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => SeatPage(
-                            departureStation: departureStation!,
-                            arrivalStation: arrivalStation!,
+                            departure: departureStation!,
+                            arrival: arrivalStation!,
                             passengerCount: passengerCount,
                             isRoundTrip: isRoundTrip,
                           ),
