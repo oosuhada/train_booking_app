@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../payment_page.dart';
+import 'payment_page.dart';
+import 'package:intl/intl.dart';
 
 class SeatPage extends StatefulWidget {
   final String departure;
@@ -17,6 +18,7 @@ class _SeatPageState extends State<SeatPage> {
   List<List<bool>> seats =
       List.generate(20, (_) => List.generate(4, (_) => false));
   List<String> selectedSeats = [];
+  DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -34,37 +36,55 @@ class _SeatPageState extends State<SeatPage> {
                 Expanded(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(widget.departure,
-                        style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple)),
+                    child: Text(
+                      widget.departure,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
                   ),
                 ),
                 Icon(Icons.arrow_circle_right_outlined, size: 30),
                 Expanded(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(widget.arrival,
-                        style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple)),
+                    child: Text(
+                      widget.arrival,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.purple,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  onPressed: () {
+                    setState(() {
+                      selectedDate = selectedDate.subtract(Duration(days: 1));
+                    });
+                  },
+                ),
+                Text(
+                  DateFormat('yyyy년 MM월 dd일').format(selectedDate),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward_ios),
+                  onPressed: () {
+                    setState(() {
+                      selectedDate = selectedDate.add(Duration(days: 1));
+                    });
+                  },
                 ),
                 SizedBox(width: 4),
                 Text('선택됨'),
@@ -148,11 +168,12 @@ class _SeatPageState extends State<SeatPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => PaymentPage(
-                            departure: widget.departure,
-                            arrival: widget.arrival,
-                            seatNumbers: selectedSeats,
-                            isRoundTrip: widget.isRoundTrip, //
-                          ),
+                              departure: widget.departure,
+                              arrival: widget.arrival,
+                              seatNumbers: selectedSeats,
+                              isRoundTrip: widget.isRoundTrip,
+                              travelDate: selectedDate //
+                              ),
                         ),
                       );
                     }
