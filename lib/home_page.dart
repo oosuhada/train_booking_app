@@ -75,32 +75,35 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 20),
 
             // 좌석 선택 버튼
-            ElevatedButton(
-              onPressed: (departureStation != null && arrivalStation != null)
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SeatPage(departureStation!, arrivalStation!)),
-                      );
-                    }
-                  : null, // 출발역과 도착역이 모두 선택되지 않으면 비활성화
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple, // 버튼 색상
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: (departureStation != null && arrivalStation != null)
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  SeatPage(departureStation!, arrivalStation!)),
+                        );
+                      }
+                    : null, // 출발역과 도착역이 모두 선택되지 않으면 비활성화
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple, // 버튼 색상
 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20), // 모서리 둥글기
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20), // 모서리 둥글기
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-                child: Text(
-                  '좌석 선택',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  child: Text(
+                    '좌석 선택',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
