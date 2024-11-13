@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'payment_page.dart';
 import 'train_schedule.dart';
 
+// Part 1 - 클래스 선언부터 build 메서드 시작
 class SeatPage extends StatefulWidget {
   final String departure;
   final String arrival;
@@ -54,17 +55,22 @@ class _SeatPageState extends State<SeatPage>
   late DateTime selectedDate;
   bool isSelectingReturn = false;
   late TrainSchedule currentSchedule;
+  late List<TrainSchedule> schedules;
 
   @override
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-
+    schedules = TrainScheduleService.getSchedules(
+      widget.departure,
+      widget.arrival,
+      selectedDate,
+    );
+    currentSchedule = schedules.first;
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
       end: Offset.zero,
@@ -72,69 +78,10 @@ class _SeatPageState extends State<SeatPage>
       parent: _controller,
       curve: Curves.easeOut,
     ));
-
-    // 현재 선택된 스케줄이 출발편인지 도착편인지 확인
     isSelectingReturn = widget.returnSchedule != null &&
         widget.selectedSchedule.trainNumber ==
             widget.returnSchedule!.trainNumber;
     currentSchedule = widget.selectedSchedule;
-  }
-
-  // 스케줄 변경 메소드 수정
-  void _changeTrainSchedule(int direction) {
-    setState(() {
-      List<TrainSchedule> availableSchedules =
-          TrainScheduleService.getSchedules(
-        widget.departure,
-        widget.arrival,
-        selectedDate,
-      );
-
-      // 현재 선택된 스케줄의 인덱스 찾기
-      int currentIndex = availableSchedules.indexWhere(
-          (schedule) => schedule.trainNumber == currentSchedule.trainNumber);
-
-      int newIndex = currentIndex + direction;
-      if (newIndex >= 0 && newIndex < availableSchedules.length) {
-        currentSchedule = availableSchedules[newIndex];
-      } else {
-        _showNoTrainAlert(
-          direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.',
-        );
-      }
-    });
-  }
-
-  // 열차 정보 위젯 수정
-  Widget _buildTrainInfo() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            children: [
-              Text(
-                currentSchedule.trainNumber,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '${DateFormat('HH:mm').format(currentSchedule.departureTime)} - '
-                '${DateFormat('HH:mm').format(currentSchedule.arrivalTime)}',
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -163,7 +110,6 @@ class _SeatPageState extends State<SeatPage>
     );
   }
 
-  // 스케줄 변경 메소드 수정
   void _changeTrainSchedule(int direction) {
     setState(() {
       List<TrainSchedule> availableSchedules =
@@ -172,15 +118,11 @@ class _SeatPageState extends State<SeatPage>
         widget.arrival,
         selectedDate,
       );
-
-      // 현재 선택된 스케줄의 인덱스 찾기
-      int currentIndex = availableSchedules.indexWhere((schedule) =>
-          schedule.trainNumber == schedules[currentScheduleIndex].trainNumber);
-
+      int currentIndex = availableSchedules.indexWhere(
+          (schedule) => schedule.trainNumber == currentSchedule.trainNumber);
       int newIndex = currentIndex + direction;
       if (newIndex >= 0 && newIndex < availableSchedules.length) {
-        schedules = [availableSchedules[newIndex]];
-        currentScheduleIndex = 0;
+        currentSchedule = availableSchedules[newIndex];
       } else {
         _showNoTrainAlert(
           direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.',
@@ -189,6 +131,7 @@ class _SeatPageState extends State<SeatPage>
     });
   }
 
+  // Part 2 - build 메서드
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,34 +160,36 @@ class _SeatPageState extends State<SeatPage>
                       children: [
                         IconButton(
                           icon: Icon(Icons.arrow_back_ios),
-                          onPressed: currentScheduleIndex > 0
+                          onPressed: schedules.indexOf(currentSchedule) > 0
                               ? () => _changeTrainSchedule(-1)
                               : null,
-                          color: currentScheduleIndex > 0
+                          color: schedules.indexOf(currentSchedule) > 0
                               ? null
                               : Colors.grey[300],
                         ),
                         Column(
                           children: [
                             Text(
-                              schedules[currentScheduleIndex].trainNumber,
+                              currentSchedule.trainNumber,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              '${DateFormat('HH:mm').format(schedules[currentScheduleIndex].departureTime)} - ${DateFormat('HH:mm').format(schedules[currentScheduleIndex].arrivalTime)}',
+                              '${DateFormat('HH:mm').format(currentSchedule.departureTime)} - ${DateFormat('HH:mm').format(currentSchedule.arrivalTime)}',
                               style: TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
                         IconButton(
                           icon: Icon(Icons.arrow_forward_ios),
-                          onPressed: currentScheduleIndex < schedules.length - 1
+                          onPressed: schedules.indexOf(currentSchedule) <
+                                  schedules.length - 1
                               ? () => _changeTrainSchedule(1)
                               : null,
-                          color: currentScheduleIndex < schedules.length - 1
+                          color: schedules.indexOf(currentSchedule) <
+                                  schedules.length - 1
                               ? null
                               : Colors.grey[300],
                         ),
@@ -275,7 +220,7 @@ class _SeatPageState extends State<SeatPage>
                                   widget.arrival,
                                   selectedDate,
                                 );
-                                currentScheduleIndex = 0;
+                                currentSchedule = schedules.first;
                               });
                             },
                           ),
@@ -306,7 +251,7 @@ class _SeatPageState extends State<SeatPage>
                                   widget.arrival,
                                   selectedDate,
                                 );
-                                currentScheduleIndex = 0;
+                                currentSchedule = schedules.first;
                               });
                             },
                           ),
@@ -441,6 +386,7 @@ class _SeatPageState extends State<SeatPage>
     );
   }
 
+// Part 3 - _buildBottomPanel
   Widget _buildBottomPanel() {
     return Positioned(
       left: 0,
@@ -494,7 +440,7 @@ class _SeatPageState extends State<SeatPage>
                               widget.departureStation,
                               selectedDate,
                             );
-                            currentScheduleIndex = 0;
+                            currentSchedule = schedules.first;
                           });
                         } else {
                           Navigator.push(
@@ -520,7 +466,6 @@ class _SeatPageState extends State<SeatPage>
                                   arrivalTime: currentSchedule.arrivalTime,
                                 ),
                                 returnSchedule: widget.returnSchedule,
-                                // 추가된 부분
                                 selectedDepartureDate: widget.selectedDate,
                                 selectedReturnDate:
                                     isSelectingReturn ? selectedDate : null,
