@@ -12,7 +12,8 @@ class TrainSchedulePage extends StatefulWidget {
   final int seniorCount;
   final bool isRoundTrip;
 
-  TrainSchedulePage({
+  const TrainSchedulePage({
+    super.key,
     required this.departureStation,
     required this.arrivalStation,
     required this.departureDate,
@@ -155,15 +156,12 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
-          selectedDate: widget.departureDate,
-          departureTime: currentSchedule.departureTime,
-          arrivalTime: currentSchedule.arrivalTime,
-          trainNumber: currentSchedule.trainNumber,
-          departureSchedule: selectedDepartureSchedule!,
-          returnSchedule: selectedReturnSchedule,
-          selectedSchedule: currentSchedule,
           selectedDepartureDate: widget.departureDate,
           selectedReturnDate: widget.returnDate,
+          departureSchedule: selectedDepartureSchedule!,
+          returnSchedule: selectedReturnSchedule,
+          departureTime: currentSchedule.departureTime,
+          departureArrivalTime: currentSchedule.arrivalTime,
         ),
       ),
     );
