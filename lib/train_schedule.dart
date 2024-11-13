@@ -87,6 +87,8 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
       context,
       MaterialPageRoute(
         builder: (context) => SeatPage(
+          departure: widget.departureStation,
+          arrival: widget.arrivalStation,
           departureStation: widget.departureStation,
           arrivalStation: widget.arrivalStation,
           adultCount: widget.adultCount,
@@ -94,6 +96,9 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
           selectedDate: widget.departureDate,
+          departureTime: selectedDepartureSchedule!.departureTime,
+          arrivalTime: selectedDepartureSchedule!.arrivalTime,
+          trainNumber: selectedDepartureSchedule!.trainNumber,
           departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
         ),
