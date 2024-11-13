@@ -23,33 +23,163 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('K Rail')),
+      appBar: AppBar(
+        title: Text('K Rail', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.purple,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('승차권 예매',
-                    style:
-                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                SizedBox(height: 20),
-                _buildDateSelector(),
-                SizedBox(height: 20),
-                _buildStationSelector(),
-                SizedBox(height: 20),
-                _buildPassengerAndTripTypeSelector(),
-                SizedBox(height: 20),
-                _buildBookButton(),
-                SizedBox(height: 35),
-                Text('더보기',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                SizedBox(height: 15),
-                _buildLogoContainer(),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 162, 50, 181),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // 승차권 예매 탭
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '승차권 예매',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            '편리한 기차 예매 서비스',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // 승차권 관리 탭
+                    Expanded(
+                      child: Container(
+                        height: 70,
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.article, color: Colors.white),
+                            SizedBox(height: 5),
+                            Text(
+                              '승차권 관리',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // 열차위치 확인 탭
+                    Expanded(
+                      child: Container(
+                        height: 70,
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.location_on, color: Colors.white),
+                            SizedBox(height: 5),
+                            Text(
+                              '열차위치 확인',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          children: [
+                            _buildDateSelector(),
+                            Divider(height: 30),
+                            _buildStationSelector(),
+                            Divider(height: 30),
+                            _buildPassengerAndTripTypeSelector(),
+                            SizedBox(height: 20),
+                            _buildBookButton(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom:
+                              BorderSide(color: Colors.grey[300]!, width: 1),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '더보기',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios, size: 18),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 0),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: _buildLogoContainer(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -66,18 +196,30 @@ class _HomePageState extends State<HomePage> {
         Row(
           children: [
             Expanded(
-              child: _buildDateButton('가는 날', departureDate, (picked) {
-                setState(() => departureDate = picked);
-              }),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _buildDateButton('가는 날', departureDate, (picked) {
+                  setState(() => departureDate = picked);
+                }),
+              ),
             ),
             if (isRoundTrip) ...[
               SizedBox(width: 10),
               Expanded(
-                child: _buildDateButton('오는 날', returnDate, (picked) {
-                  setState(() => returnDate = picked);
-                }),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: _buildDateButton('오는 날', returnDate, (picked) {
+                    setState(() => returnDate = picked);
+                  }),
+                ),
               ),
-            ],
+            ]
           ],
         ),
       ],

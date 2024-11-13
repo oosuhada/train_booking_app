@@ -18,6 +18,7 @@ class SeatPage extends StatefulWidget {
   final String trainNumber;
   final TrainSchedule departureSchedule;
   final TrainSchedule? returnSchedule;
+  final TrainSchedule selectedSchedule;
 
   SeatPage({
     required this.departure,
@@ -34,6 +35,9 @@ class SeatPage extends StatefulWidget {
     required this.trainNumber,
     required this.departureSchedule,
     this.returnSchedule,
+    required this.selectedSchedule,
+    required DateTime selectedDepartureDate,
+    DateTime? selectedReturnDate,
   });
 
   @override
@@ -56,18 +60,25 @@ class _SeatPageState extends State<SeatPage>
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-    schedules = TrainScheduleService.getSchedules(
-      widget.departure,
-      widget.arrival,
-      selectedDate,
-    );
+    schedules = [widget.selectedSchedule];
+    currentScheduleIndex = 0;
+
+    // 선택된 스케줄의 인덱스를 정확히 찾기
+    currentScheduleIndex = schedules.indexWhere((schedule) =>
+        schedule.trainNumber == widget.trainNumber &&
+        schedule.departureTime.hour == widget.departureTime.hour &&
+        schedule.departureTime.minute == widget.departureTime.minute);
+
+    // 인덱스를 찾지 못한 경우에만 기본값 0으로 설정
+    if (currentScheduleIndex == -1) {
+      currentScheduleIndex = 0;
+    }
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _offsetAnimation = Tween<Offset>(
+    _offsetAnimation = Tween(
       begin: const Offset(0, 1),
       end: Offset.zero,
     ).animate(CurvedAnimation(
@@ -102,11 +113,24 @@ class _SeatPageState extends State<SeatPage>
     );
   }
 
+  // 스케줄 변경 메소드 수정
   void _changeTrainSchedule(int direction) {
     setState(() {
-      int newIndex = currentScheduleIndex + direction;
-      if (newIndex >= 0 && newIndex < schedules.length) {
-        currentScheduleIndex = newIndex;
+      List<TrainSchedule> availableSchedules =
+          TrainScheduleService.getSchedules(
+        widget.departure,
+        widget.arrival,
+        selectedDate,
+      );
+
+      // 현재 선택된 스케줄의 인덱스 찾기
+      int currentIndex = availableSchedules.indexWhere((schedule) =>
+          schedule.trainNumber == schedules[currentScheduleIndex].trainNumber);
+
+      int newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < availableSchedules.length) {
+        schedules = [availableSchedules[newIndex]];
+        currentScheduleIndex = 0;
       } else {
         _showNoTrainAlert(
           direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.',
@@ -187,6 +211,12 @@ class _SeatPageState extends State<SeatPage>
                           IconButton(
                             icon: Icon(Icons.arrow_back_ios, size: 12),
                             onPressed: () {
+                              DateTime today = DateTime.now();
+                              if (selectedDate
+                                  .isBefore(today.add(Duration(days: 1)))) {
+                                _showNoTrainAlert('더 이전 날짜는 선택할 수 없습니다.');
+                                return;
+                              }
                               setState(() {
                                 selectedDate =
                                     selectedDate.subtract(Duration(days: 1));
@@ -432,8 +462,21 @@ class _SeatPageState extends State<SeatPage>
                                 adultCount: widget.adultCount,
                                 childCount: widget.childCount,
                                 seniorCount: widget.seniorCount,
-                                departureSchedule: widget.departureSchedule,
+                                departureSchedule: TrainSchedule(
+                                  trainNumber: schedules[currentScheduleIndex]
+                                      .trainNumber,
+                                  departureStation: widget.departureStation,
+                                  arrivalStation: widget.arrivalStation,
+                                  departureTime: schedules[currentScheduleIndex]
+                                      .departureTime,
+                                  arrivalTime: schedules[currentScheduleIndex]
+                                      .arrivalTime,
+                                ),
                                 returnSchedule: widget.returnSchedule,
+                                // 추가된 부분
+                                selectedDepartureDate: widget.selectedDate,
+                                selectedReturnDate:
+                                    isSelectingReturn ? selectedDate : null,
                               ),
                             ),
                           );

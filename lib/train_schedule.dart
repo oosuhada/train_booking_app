@@ -47,17 +47,67 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   }
 
   void _loadSchedules() {
-    departureSchedules = TrainScheduleService.getSchedules(
-      widget.departureStation,
-      widget.arrivalStation,
-      widget.departureDate,
+    // 가상의 스케줄 생성
+    final baseTime = DateTime(
+      widget.departureDate.year,
+      widget.departureDate.month,
+      widget.departureDate.day,
+      6, // 첫차 시간을 06:00로 설정
+      0,
     );
-    if (widget.isRoundTrip && widget.returnDate != null) {
-      returnSchedules = TrainScheduleService.getSchedules(
-        widget.arrivalStation,
+
+    departureSchedules = [];
+
+    // 06:00부터 22:00까지 1시간 간격으로 스케줄 생성
+    for (int i = 0; i < 17; i++) {
+      final departureTime = baseTime.add(Duration(hours: i));
+      final travelMinutes = TrainScheduleService.calculateTravelTime(
         widget.departureStation,
-        widget.returnDate!,
+        widget.arrivalStation,
       );
+      final arrivalTime = departureTime.add(Duration(minutes: travelMinutes));
+
+      departureSchedules.add(
+        TrainSchedule(
+          trainNumber: 'KTX ${100 + i}',
+          departureStation: widget.departureStation,
+          arrivalStation: widget.arrivalStation,
+          departureTime: departureTime,
+          arrivalTime: arrivalTime,
+        ),
+      );
+    }
+
+    // 왕복인 경우 돌아오는 스케줄도 생성
+    if (widget.isRoundTrip && widget.returnDate != null) {
+      final baseReturnTime = DateTime(
+        widget.returnDate!.year,
+        widget.returnDate!.month,
+        widget.returnDate!.day,
+        6,
+        0,
+      );
+
+      returnSchedules = [];
+
+      for (int i = 0; i < 17; i++) {
+        final departureTime = baseReturnTime.add(Duration(hours: i));
+        final travelMinutes = TrainScheduleService.calculateTravelTime(
+          widget.arrivalStation,
+          widget.departureStation,
+        );
+        final arrivalTime = departureTime.add(Duration(minutes: travelMinutes));
+
+        returnSchedules.add(
+          TrainSchedule(
+            trainNumber: 'KTX ${200 + i}',
+            departureStation: widget.arrivalStation,
+            arrivalStation: widget.departureStation,
+            departureTime: departureTime,
+            arrivalTime: arrivalTime,
+          ),
+        );
+      }
     } else {
       returnSchedules = [];
     }
@@ -76,21 +126,23 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
       setState(() {
         isShowingReturn = true;
       });
-      _tabController.animateTo(1); // 도착편 탭으로 전환
+      _tabController.animateTo(1);
     } else {
       _navigateToSeatSelection();
     }
   }
 
   void _navigateToSeatSelection() {
+    if (selectedDepartureSchedule == null) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SeatPage(
           departure: widget.departureStation,
           arrival: widget.arrivalStation,
-          departureStation: widget.departureStation,
-          arrivalStation: widget.arrivalStation,
+          departureStation: selectedDepartureSchedule!.departureStation,
+          arrivalStation: selectedDepartureSchedule!.arrivalStation,
           adultCount: widget.adultCount,
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
@@ -101,6 +153,9 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           trainNumber: selectedDepartureSchedule!.trainNumber,
           departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
+          selectedSchedule: selectedDepartureSchedule!,
+          selectedDepartureDate: widget.departureDate,
+          selectedReturnDate: widget.returnDate,
         ),
       ),
     );
@@ -378,11 +433,25 @@ class TrainScheduleService {
       return schedules;
     }
 
+    // 현재 시간 이후의 스케줄만 생성
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+
+    // 선택한 날짜가 오늘 이전이면 오늘 날짜로 설정
+    if (date.isBefore(today)) {
+      date = today;
+    }
+
     // 06:00부터 22:00까지 1시간 간격으로 열차 스케줄 생성
     for (int hour = 6; hour <= 22; hour++) {
       DateTime depTime = DateTime(date.year, date.month, date.day, hour, 0);
-      DateTime arrTime = depTime.add(Duration(minutes: travelTime));
 
+      // 오늘 날짜일 경우 현재 시간 이후의 스케줄만 생성
+      if (date.isAtSameMomentAs(today) && depTime.isBefore(now)) {
+        continue;
+      }
+
+      DateTime arrTime = depTime.add(Duration(minutes: travelTime));
       schedules.add(TrainSchedule(
         departureStation: departure,
         arrivalStation: arrival,
