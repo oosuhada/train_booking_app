@@ -111,19 +111,67 @@ class _SeatPageState extends State<SeatPage>
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 10),
+
+                  // 열차 정보 위젯
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100], // 연한 회색 배경
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5), // 내부 여백 추가
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: currentScheduleIndex > 0
+                              ? () => _changeTrainSchedule(-1)
+                              : () => _showNoTrainAlert('이전 열차가 없습니다.'),
+                          color: currentScheduleIndex > 0
+                              ? null
+                              : Colors.grey[300],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              schedules[currentScheduleIndex].trainNumber,
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${DateFormat('HH:mm').format(schedules[currentScheduleIndex].departureTime)} - ${DateFormat('HH:mm').format(schedules[currentScheduleIndex].arrivalTime)}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: currentScheduleIndex < schedules.length - 1
+                              ? () => _changeTrainSchedule(1)
+                              : () => _showNoTrainAlert('다음 열차가 없습니다.'),
+                          color: currentScheduleIndex < schedules.length - 1
+                              ? null
+                              : Colors.grey[300],
+                        ),
+                      ],
+                    ),
+                  ),
                   // 날짜 선택 위젯
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
+                        mainAxisSize: MainAxisSize.min, // 추가: 컬럼의 크기를 최소화
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_back_ios, size: 18),
+                            icon: Icon(Icons.arrow_back_ios, size: 12),
                             onPressed: () {
                               setState(() {
                                 selectedDate =
@@ -146,12 +194,7 @@ class _SeatPageState extends State<SeatPage>
                       Column(
                         children: [
                           Text(
-                            DateFormat('dd').format(selectedDate),
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            DateFormat('yy년 MM월').format(selectedDate),
+                            DateFormat('yy년 MM월 dd일').format(selectedDate),
                             style: TextStyle(fontSize: 14),
                           ),
                         ],
@@ -159,7 +202,7 @@ class _SeatPageState extends State<SeatPage>
                       Column(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_forward_ios, size: 18),
+                            icon: Icon(Icons.arrow_forward_ios, size: 12),
                             onPressed: () {
                               setState(() {
                                 selectedDate =
@@ -178,43 +221,6 @@ class _SeatPageState extends State<SeatPage>
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  // 열차 정보 위젯
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
-                        onPressed: currentScheduleIndex > 0
-                            ? () => _changeTrainSchedule(-1)
-                            : () => _showNoTrainAlert('이전 열차가 없습니다.'),
-                        color:
-                            currentScheduleIndex > 0 ? null : Colors.grey[300],
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            schedules[currentScheduleIndex].trainNumber,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${DateFormat('HH:mm').format(schedules[currentScheduleIndex].departureTime)} - ${DateFormat('HH:mm').format(schedules[currentScheduleIndex].arrivalTime)}',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
-                        onPressed: currentScheduleIndex < schedules.length - 1
-                            ? () => _changeTrainSchedule(1)
-                            : () => _showNoTrainAlert('다음 열차가 없습니다.'),
-                        color: currentScheduleIndex < schedules.length - 1
-                            ? null
-                            : Colors.grey[300],
                       ),
                     ],
                   ),
