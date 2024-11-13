@@ -32,16 +32,6 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 10), // 여백을 절반으로 줄임
-                      Container(
-                        height: 200,
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: Image.asset(
-                            'asset/KRAIL_LOGO.jpg', // asset 폴더의 이미지 파일 경로
-                            fit: BoxFit.contain, // 이미지가 컨테이너에 맞게 조정되도록 설정
-                          ),
-                        ),
-                      ),
                       SizedBox(height: 20),
                       Text('승차권 예매',
                           style: TextStyle(
@@ -204,6 +194,22 @@ class _HomePageState extends State<HomePage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 40),
+                      Text('더보기',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 15),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                            image: AssetImage('asset/KRAIL_LOGO.jpg'),
+                            // asset 폴더의 이미지 파일 경로
+                            fit: BoxFit.cover, // 이미지가 컨테이너에 맞게 확대되도록 설정
                           ),
                         ),
                       ),
