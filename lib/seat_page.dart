@@ -61,10 +61,12 @@ class _SeatPageState extends State<SeatPage>
     super.initState();
     selectedDate = widget.selectedDate;
     // 출발편/도착편에 따라 적절한 스케줄 설정
-    schedules = [
-      isSelectingReturn ? widget.returnSchedule! : widget.departureSchedule
-    ];
+    schedules = [widget.selectedSchedule];
     currentScheduleIndex = 0;
+    isSelectingReturn = widget.returnSchedule != null &&
+        widget.selectedSchedule.trainNumber ==
+            widget.returnSchedule!.trainNumber;
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
