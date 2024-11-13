@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'station_list.dart';
 import 'seat_page.dart';
 import 'passenger_selection.dart';
+import 'train_schedule.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,14 +17,17 @@ class _HomePageState extends State<HomePage> {
   int adultCount = 1;
   int childCount = 0;
   int seniorCount = 0;
+  DateTime? departureDate;
+  DateTime? returnDate;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('K Rail')),
-        body: Container(
-          color: Colors.grey[200],
-          child: Column(children: [
+      appBar: AppBar(title: Text('K Rail')),
+      body: Container(
+        color: Colors.grey[200],
+        child: Column(
+          children: [
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -31,11 +36,23 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 10), // 여백을 절반으로 줄임
+                      SizedBox(height: 10),
+                      Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: Image.asset(
+                            'asset/KRAIL_LOGO.jpg',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                       SizedBox(height: 20),
                       Text('승차권 예매',
                           style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          )),
                       SizedBox(height: 20),
                       Container(
                         height: 200,
@@ -67,21 +84,25 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 Expanded(
                                   child: _buildStationSelector(
-                                      '출발역', departureStation, () async {
-                                    final selectedStation =
-                                        await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => StationListPage(
-                                            selectedStation: arrivalStation),
-                                      ),
-                                    );
-                                    if (selectedStation != null) {
-                                      setState(() {
-                                        departureStation = selectedStation;
-                                      });
-                                    }
-                                  }),
+                                    '출발역',
+                                    departureStation,
+                                    () async {
+                                      final selectedStation =
+                                          await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => StationListPage(
+                                            selectedStation: arrivalStation,
+                                          ),
+                                        ),
+                                      );
+                                      if (selectedStation != null) {
+                                        setState(() {
+                                          departureStation = selectedStation;
+                                        });
+                                      }
+                                    },
+                                  ),
                                 ),
                                 Container(
                                   width: 2,
@@ -90,27 +111,33 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 Expanded(
                                   child: _buildStationSelector(
-                                      '도착역', arrivalStation, () async {
-                                    final selectedStation =
-                                        await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => StationListPage(
-                                            selectedStation: departureStation),
-                                      ),
-                                    );
-                                    if (selectedStation != null) {
-                                      setState(() {
-                                        arrivalStation = selectedStation;
-                                      });
-                                    }
-                                  }),
+                                    '도착역',
+                                    arrivalStation,
+                                    () async {
+                                      final selectedStation =
+                                          await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => StationListPage(
+                                            selectedStation: departureStation,
+                                          ),
+                                        ),
+                                      );
+                                      if (selectedStation != null) {
+                                        setState(() {
+                                          arrivalStation = selectedStation;
+                                        });
+                                      }
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
                           ],
                         ),
                       ),
+                      SizedBox(height: 20),
+                      _buildDateSelector(),
                       SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,6 +175,9 @@ class _HomePageState extends State<HomePage> {
                                 onChanged: (value) {
                                   setState(() {
                                     isRoundTrip = value;
+                                    if (!isRoundTrip) {
+                                      returnDate = null;
+                                    }
                                   });
                                 },
                               ),
@@ -161,21 +191,45 @@ class _HomePageState extends State<HomePage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: (departureStation != null &&
-                                  arrivalStation != null)
+                                  arrivalStation != null &&
+                                  departureDate != null &&
+                                  (!isRoundTrip ||
+                                      (isRoundTrip && returnDate != null)))
                               ? () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SeatPage(
-                                        departureStation!,
-                                        arrivalStation!,
-                                        adultCount,
-                                        childCount,
-                                        seniorCount,
-                                        isRoundTrip,
-                                      ),
-                                    ),
+                                  List<TrainSchedule> schedules =
+                                      TrainScheduleService.getSchedules(
+                                    departureStation!,
+                                    arrivalStation!,
+                                    departureDate!,
                                   );
+
+                                  if (schedules.isNotEmpty) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SeatPage(
+                                          departureStation!,
+                                          arrivalStation!,
+                                          adultCount,
+                                          childCount,
+                                          seniorCount,
+                                          isRoundTrip,
+                                          selectedDate: departureDate!,
+                                          departureTime:
+                                              schedules[0].departureTime,
+                                          arrivalTime: schedules[0].arrivalTime,
+                                          trainNumber: schedules[0].trainNumber,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    // 스케줄이 없을 경우 처리
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text('선택한 날짜에 이용 가능한 열차가 없습니다.')),
+                                    );
+                                  }
                                 }
                               : null,
                           child: Padding(
@@ -197,29 +251,15 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 40),
-                      Text('더보기',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 15),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          image: DecorationImage(
-                            image: AssetImage('asset/KRAIL_LOGO.jpg'),
-                            // asset 폴더의 이미지 파일 경로
-                            fit: BoxFit.cover, // 이미지가 컨테이너에 맞게 확대되도록 설정
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          ]),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildStationSelector(String label, String? station, Function onTap) {
@@ -244,6 +284,87 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDateSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '날짜 선택',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: departureDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                  );
+                  if (picked != null && picked != departureDate) {
+                    setState(() {
+                      departureDate = picked;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    departureDate == null
+                        ? '가는 날'
+                        : DateFormat('yyyy-MM-dd').format(departureDate!),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
+            if (isRoundTrip) ...[
+              SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          returnDate ?? (departureDate ?? DateTime.now()),
+                      firstDate: departureDate ?? DateTime.now(),
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                    );
+                    if (picked != null && picked != returnDate) {
+                      setState(() {
+                        returnDate = picked;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      returnDate == null
+                          ? '오는 날'
+                          : DateFormat('yyyy-MM-dd').format(returnDate!),
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }

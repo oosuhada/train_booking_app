@@ -9,9 +9,23 @@ class SeatPage extends StatefulWidget {
   final int childCount;
   final int seniorCount;
   final bool isRoundTrip;
+  final DateTime selectedDate;
+  final DateTime departureTime;
+  final DateTime arrivalTime;
+  final String trainNumber;
 
-  SeatPage(this.departure, this.arrival, this.adultCount, this.childCount,
-      this.seniorCount, this.isRoundTrip);
+  SeatPage(
+    this.departure,
+    this.arrival,
+    this.adultCount,
+    this.childCount,
+    this.seniorCount,
+    this.isRoundTrip, {
+    required this.selectedDate,
+    required this.departureTime,
+    required this.arrivalTime,
+    required this.trainNumber,
+  });
 
   @override
   _SeatPageState createState() => _SeatPageState();
@@ -62,34 +76,32 @@ class _SeatPageState extends State<SeatPage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            widget.departure,
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple,
-                            ),
-                          ),
-                        ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_ios),
+                        onPressed: () {
+                          // 이전 열차 로직 구현
+                        },
                       ),
-                      Icon(Icons.arrow_circle_right_outlined, size: 30),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            widget.arrival,
+                      Column(
+                        children: [
+                          Text(
+                            widget.trainNumber,
                             style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple,
-                            ),
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                        ),
+                          Text(
+                            '${DateFormat('HH:mm').format(widget.departureTime)} - ${DateFormat('HH:mm').format(widget.arrivalTime)}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_forward_ios),
+                        onPressed: () {
+                          // 다음 열차 로직 구현
+                        },
                       ),
                     ],
                   ),
