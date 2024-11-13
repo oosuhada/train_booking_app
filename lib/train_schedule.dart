@@ -6,7 +6,7 @@ class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
   final String arrivalStation;
   final DateTime departureDate;
-  final DateTime? returnDate;
+  final DateTime returnDate;
   final int adultCount;
   final int childCount;
   final int seniorCount;
@@ -17,7 +17,7 @@ class TrainSchedulePage extends StatefulWidget {
     required this.departureStation,
     required this.arrivalStation,
     required this.departureDate,
-    this.returnDate,
+    required this.returnDate,
     required this.adultCount,
     required this.childCount,
     required this.seniorCount,
@@ -30,87 +30,36 @@ class TrainSchedulePage extends StatefulWidget {
 
 class _TrainSchedulePageState extends State<TrainSchedulePage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  late final TabController _tabController;
   late List<TrainSchedule> departureSchedules;
   late List<TrainSchedule> returnSchedules;
   bool isShowingReturn = false;
   TrainSchedule? selectedDepartureSchedule;
   TrainSchedule? selectedReturnSchedule;
 
+  _TrainSchedulePageState() {
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: widget.isRoundTrip ? 2 : 1,
-      vsync: this,
-    );
+    _tabController =
+        TabController(length: widget.isRoundTrip ? 2 : 1, vsync: this);
     _loadSchedules();
   }
 
   void _loadSchedules() {
-    // 가상의 스케줄 생성
-    final baseTime = DateTime(
-      widget.departureDate.year,
-      widget.departureDate.month,
-      widget.departureDate.day,
-      6, // 첫차 시간을 06:00로 설정
-      0,
+    Map<String, List<TrainSchedule>> allSchedules =
+        TrainScheduleService.getSchedules(
+      widget.departureStation,
+      widget.arrivalStation,
+      widget.departureDate,
+      widget.isRoundTrip ? (widget.returnDate ?? widget.departureDate) : null,
     );
-
-    departureSchedules = [];
-
-    // 06:00부터 22:00까지 1시간 간격으로 스케줄 생성
-    for (int i = 0; i < 17; i++) {
-      final departureTime = baseTime.add(Duration(hours: i));
-      final travelMinutes = TrainScheduleService.calculateTravelTime(
-        widget.departureStation,
-        widget.arrivalStation,
-      );
-      final arrivalTime = departureTime.add(Duration(minutes: travelMinutes));
-
-      departureSchedules.add(
-        TrainSchedule(
-          trainNumber: 'KTX ${100 + i}',
-          departureStation: widget.departureStation,
-          arrivalStation: widget.arrivalStation,
-          departureTime: departureTime,
-          arrivalTime: arrivalTime,
-        ),
-      );
-    }
-
-    // 왕복인 경우 돌아오는 스케줄도 생성
-    if (widget.isRoundTrip && widget.returnDate != null) {
-      final baseReturnTime = DateTime(
-        widget.returnDate!.year,
-        widget.returnDate!.month,
-        widget.returnDate!.day,
-        6,
-        0,
-      );
-
-      returnSchedules = [];
-
-      for (int i = 0; i < 17; i++) {
-        final departureTime = baseReturnTime.add(Duration(hours: i));
-        final travelMinutes = TrainScheduleService.calculateTravelTime(
-          widget.arrivalStation,
-          widget.departureStation,
-        );
-        final arrivalTime = departureTime.add(Duration(minutes: travelMinutes));
-
-        returnSchedules.add(
-          TrainSchedule(
-            trainNumber: 'KTX ${200 + i}',
-            departureStation: widget.arrivalStation,
-            arrivalStation: widget.departureStation,
-            departureTime: departureTime,
-            arrivalTime: arrivalTime,
-          ),
-        );
-      }
-    } else {
-      returnSchedules = [];
+    departureSchedules = allSchedules['departure']!;
+    if (widget.isRoundTrip) {
+      returnSchedules = allSchedules['return']!;
     }
   }
 
@@ -143,7 +92,6 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   void _navigateToSeatSelection({required bool isReturn}) {
     TrainSchedule currentSchedule =
         isReturn ? selectedReturnSchedule! : selectedDepartureSchedule!;
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -156,12 +104,15 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
-          selectedDepartureDate: widget.departureDate,
+          selectedDepartureDate:
+              isReturn ? widget.returnDate : widget.departureDate,
           selectedReturnDate: widget.returnDate,
           departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
           departureTime: currentSchedule.departureTime,
           departureArrivalTime: currentSchedule.arrivalTime,
+          returnDepartureTime: isReturn ? currentSchedule.departureTime : null,
+          returnArrivalTime: isReturn ? currentSchedule.arrivalTime : null,
         ),
       ),
     );
@@ -169,6 +120,9 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
 
   @override
   Widget build(BuildContext context) {
+    if (_tabController == null) {
+      return CircularProgressIndicator(); // 또는 다른 로딩 위젯
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('열차 시간표'),
@@ -455,16 +409,38 @@ class TrainScheduleService {
     }
   };
 
-  static List<TrainSchedule> getSchedules(
-      String departure, String arrival, DateTime date) {
+  static Map<String, List<TrainSchedule>> getSchedules(
+    String departure,
+    String arrival,
+    DateTime departureDate,
+    DateTime? returnDate,
+  ) {
+    Map<String, List<TrainSchedule>> allSchedules = {
+      'departure': [],
+      'return': [],
+    };
+
+    // 출발편 스케줄 생성
+    allSchedules['departure'] =
+        _generateSchedules(departure, arrival, departureDate, false);
+
+    // 도착편 스케줄 생성 (왕복인 경우)
+    if (returnDate != null) {
+      allSchedules['return'] =
+          _generateSchedules(arrival, departure, returnDate, true);
+    }
+
+    return allSchedules;
+  }
+
+  static List<TrainSchedule> _generateSchedules(
+      String departure, String arrival, DateTime date, bool isReturn) {
     List<TrainSchedule> schedules = [];
     int travelTime = calculateTravelTime(departure, arrival);
-
     if (travelTime == 0) {
       return schedules;
     }
 
-    // 현재 시간 이후의 스케줄만 생성
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
 
@@ -483,23 +459,17 @@ class TrainScheduleService {
       }
 
       DateTime arrTime = depTime.add(Duration(minutes: travelTime));
+      int trainNumber =
+          isReturn ? 200 + schedules.length : 100 + schedules.length;
       schedules.add(TrainSchedule(
         departureStation: departure,
         arrivalStation: arrival,
         departureTime: depTime,
         arrivalTime: arrTime,
-        trainNumber: 'KTX${100 + schedules.length}',
+        trainNumber: 'KTX$trainNumber',
       ));
     }
 
     return schedules;
-  }
-
-  static List<String> getStations() {
-    return stations;
-  }
-
-  static int getTotalTravelTime() {
-    return calculateTravelTime('수서', '부산');
   }
 }
