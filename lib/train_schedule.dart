@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'seat_page.dart';
+import 'station_list.dart';
 
 class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
@@ -30,11 +31,17 @@ class TrainSchedulePage extends StatefulWidget {
 class _TrainSchedulePageState extends State<TrainSchedulePage> {
   late List<TrainSchedule> departureSchedules;
   late List<TrainSchedule> returnSchedules;
-  bool isSelectingReturn = false;
+  bool isShowingReturn = false;
+  TrainSchedule? selectedDepartureSchedule;
+  TrainSchedule? selectedReturnSchedule;
 
   @override
   void initState() {
     super.initState();
+    _loadSchedules();
+  }
+
+  void _loadSchedules() {
     departureSchedules = TrainScheduleService.getSchedules(
       widget.departureStation,
       widget.arrivalStation,
@@ -46,70 +53,106 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
         widget.departureStation,
         widget.returnDate!,
       );
+    } else {
+      returnSchedules = [];
     }
   }
 
-  void _selectSchedule(TrainSchedule schedule) {
-    if (!widget.isRoundTrip || isSelectingReturn) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SeatPage(
-            widget.departureStation,
-            widget.arrivalStation,
-            widget.adultCount,
-            widget.childCount,
-            widget.seniorCount,
-            widget.isRoundTrip,
-            selectedDate:
-                isSelectingReturn ? widget.returnDate! : widget.departureDate,
-            departureTime: schedule.departureTime,
-            arrivalTime: schedule.arrivalTime,
-            trainNumber: schedule.trainNumber,
-            isReturn: isSelectingReturn,
-          ),
-        ),
-      );
-    } else {
+  void _selectSchedule(TrainSchedule schedule, bool isReturn) {
+    setState(() {
+      if (isReturn) {
+        selectedReturnSchedule = schedule;
+      } else {
+        selectedDepartureSchedule = schedule;
+      }
+    });
+
+    if (widget.isRoundTrip && !isReturn) {
+      // 출발편 선택 후 도착편 선택으로 전환
       setState(() {
-        isSelectingReturn = true;
+        isShowingReturn = true;
       });
+    } else {
+      // 도착편 선택 완료 또는 편도 여정
+      _navigateToSeatSelection();
     }
+  }
+
+  void _navigateToSeatSelection() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SeatPage(
+          widget.departureStation,
+          widget.arrivalStation,
+          widget.adultCount,
+          widget.childCount,
+          widget.seniorCount,
+          widget.isRoundTrip,
+          selectedDate: widget.departureDate,
+          departureTime: selectedDepartureSchedule!.departureTime,
+          arrivalTime: selectedDepartureSchedule!.arrivalTime,
+          trainNumber: selectedDepartureSchedule!.trainNumber,
+          isReturn: false,
+          returnSchedule: selectedReturnSchedule,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isSelectingReturn ? '도착편 열차 시간표' : '출발편 열차 시간표'),
+    return DefaultTabController(
+      length: widget.isRoundTrip ? 2 : 1,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('열차 시간표'),
+          bottom: TabBar(
+            tabs: [
+              Tab(text: '출발편'),
+              if (widget.isRoundTrip) Tab(text: '도착편'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildScheduleList(departureSchedules, false),
+            if (widget.isRoundTrip) _buildScheduleList(returnSchedules, true),
+          ],
+        ),
       ),
-      body: ListView.builder(
-        itemCount: isSelectingReturn
-            ? returnSchedules.length
-            : departureSchedules.length,
-        itemBuilder: (context, index) {
-          TrainSchedule schedule = isSelectingReturn
-              ? returnSchedules[index]
-              : departureSchedules[index];
-          Duration duration =
-              schedule.arrivalTime.difference(schedule.departureTime);
-          String durationStr =
-              '${duration.inHours}시간 ${duration.inMinutes % 60}분';
+    );
+  }
 
-          return ListTile(
-            title: Text('${schedule.trainNumber}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 3),
-                Text(
-                    '출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, 도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} 소요시간: $durationStr'),
-              ],
-            ),
-            onTap: () => _selectSchedule(schedule),
-          );
-        },
-      ),
+  Widget _buildScheduleList(List<TrainSchedule> schedules, bool isReturn) {
+    if (schedules.isEmpty) {
+      return Center(
+        child: Text('해당 날짜에 스케줄이 없습니다.'),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: schedules.length,
+      itemBuilder: (context, index) {
+        TrainSchedule schedule = schedules[index];
+        Duration duration =
+            schedule.arrivalTime.difference(schedule.departureTime);
+        String durationStr =
+            '${duration.inHours}시간 ${duration.inMinutes % 60}분';
+
+        return ListTile(
+          title: Text('${schedule.trainNumber}'),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 3),
+              Text(
+                  '출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, 도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} 소요시간: $durationStr'),
+            ],
+          ),
+          onTap: () => _selectSchedule(schedule, isReturn),
+        );
+      },
     );
   }
 }
@@ -152,7 +195,6 @@ class TrainScheduleService {
     return null;
   }
 
-//null safety 문제 해결
   static int calculateTravelTime(String departure, String arrival) {
     int totalTime = 0;
     String currentStation = departure;
