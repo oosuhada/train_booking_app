@@ -97,14 +97,12 @@ class _PaymentPageState extends State<PaymentPage> {
                 '어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
               ]),
               SizedBox(height: 10),
-              _buildSectionWithDivider('가격 정보', [
-                '기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
-                '경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
-                if (widget.isRoundTrip)
-                  '왕복 요금: ${PriceInfo.getPrice(widget.departure, widget.arrival) * 2}원',
-                '할인 전 가격: ${priceInfo.originalPrice}원',
+              _buildSectionWithDivider('일정 정보', [
+                '출발역: ${widget.departure}',
+                '도착역: ${widget.arrival}',
+                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule.departureTime)} - ${DateFormat('HH:mm').format(widget.departureSchedule.arrivalTime)})',
+                if (widget.isRoundTrip && widget.returnSchedule != null)
+                  '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.returnSchedule!.departureTime)} - ${DateFormat('HH:mm').format(widget.returnSchedule!.arrivalTime)})',
               ]),
               SizedBox(height: 15),
               Text('쿠폰 선택:',
