@@ -37,10 +37,6 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   TrainSchedule? selectedDepartureSchedule;
   TrainSchedule? selectedReturnSchedule;
 
-  _TrainSchedulePageState() {
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +51,7 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
       widget.departureStation,
       widget.arrivalStation,
       widget.departureDate,
-      widget.isRoundTrip ? (widget.returnDate ?? widget.departureDate) : null,
+      widget.isRoundTrip ? (widget.returnDate) : null,
     );
     departureSchedules = allSchedules['departure']!;
     if (widget.isRoundTrip) {
@@ -120,9 +116,6 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
 
   @override
   Widget build(BuildContext context) {
-    if (_tabController == null) {
-      return CircularProgressIndicator(); // 또는 다른 로딩 위젯
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text('열차 시간표'),

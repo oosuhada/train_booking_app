@@ -71,12 +71,10 @@ class _SeatPageState extends State<SeatPage>
   late Map<String, List<TrainSchedule>> allSchedules;
   late List<TrainSchedule> departureSchedules;
   List<TrainSchedule>? returnSchedules;
-  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
 
     departureSchedule = widget.departureSchedule;
     returnSchedule = widget.returnSchedule;
@@ -457,24 +455,15 @@ class _SeatPageState extends State<SeatPage>
                     ? () {
                         if (widget.isRoundTrip && !isSelectingReturn) {
                           setState(() {
-                            selectedDepartureDate = selectedDepartureDate
-                                .subtract(Duration(days: 1));
-                            allSchedules = TrainScheduleService.getSchedules(
-                                widget.departure,
-                                widget.arrival,
-                                selectedDepartureDate,
-                                null // returnDate는 null로 설정 (편도 여정이므로)
-                                );
-                            departureSchedules =
-                                allSchedules['departure'] ?? [];
-                            if (departureSchedules.isNotEmpty) {
-                              departureSchedule = departureSchedules.first;
-                            } else {
-                              // 스케줄이 없는 경우 처리
-                              departureSchedule = null;
-                            }
+                            isSelectingReturn = true;
+                            // 도착편 스케줄 및 좌석 초기화
+                            seats =
+                                List.generate(20, (_) => List.filled(4, false));
+                            selectedReturnSeats.clear();
+                            // 필요한 경우 returnSchedule 초기화
                           });
                         } else {
+                          // 기존의 결제 페이지로 이동하는 코드
                           Navigator.push(
                             context,
                             MaterialPageRoute(
