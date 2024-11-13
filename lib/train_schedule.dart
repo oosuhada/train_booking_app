@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'seat_page.dart';
-import 'station_list.dart';
 
 class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
@@ -83,12 +82,12 @@ class _TrainSchedulePageState extends State<TrainSchedulePage> {
       context,
       MaterialPageRoute(
         builder: (context) => SeatPage(
-          widget.departureStation,
-          widget.arrivalStation,
-          widget.adultCount,
-          widget.childCount,
-          widget.seniorCount,
-          widget.isRoundTrip,
+          departureStation: widget.departureStation,
+          arrivalStation: widget.arrivalStation,
+          adultCount: widget.adultCount,
+          childCount: widget.childCount,
+          seniorCount: widget.seniorCount,
+          isRoundTrip: widget.isRoundTrip,
           selectedDate: widget.departureDate,
           departureTime: selectedDepartureSchedule!.departureTime,
           arrivalTime: selectedDepartureSchedule!.arrivalTime,
@@ -198,20 +197,30 @@ class TrainScheduleService {
   static int calculateTravelTime(String departure, String arrival) {
     int totalTime = 0;
     String currentStation = departure;
+    bool isReverse = stations.indexOf(departure) > stations.indexOf(arrival);
 
     while (currentStation != arrival) {
       Map<String, int>? nextStations = travelTimes[currentStation];
       if (nextStations == null) break;
 
-      String? nextStation = firstWhereOrNull(
-        nextStations.keys,
-        (station) =>
-            stations.indexOf(station) > stations.indexOf(currentStation) &&
-            stations.indexOf(station) <= stations.indexOf(arrival),
-      );
+      String? nextStation;
+      if (isReverse) {
+        nextStation = firstWhereOrNull(
+          nextStations.keys,
+          (station) =>
+              stations.indexOf(station) < stations.indexOf(currentStation) &&
+              stations.indexOf(station) >= stations.indexOf(arrival),
+        );
+      } else {
+        nextStation = firstWhereOrNull(
+          nextStations.keys,
+          (station) =>
+              stations.indexOf(station) > stations.indexOf(currentStation) &&
+              stations.indexOf(station) <= stations.indexOf(arrival),
+        );
+      }
 
       if (nextStation == null) break;
-
       totalTime += nextStations[nextStation]!;
       currentStation = nextStation;
     }
