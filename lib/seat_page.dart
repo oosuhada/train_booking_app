@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'payment_page.dart';
 import 'package:intl/intl.dart';
+import 'train_schedule.dart';
 
 class SeatPage extends StatefulWidget {
   final String departure;
@@ -35,18 +36,33 @@ class _SeatPageState extends State<SeatPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
-  List<List<bool>> seats =
-      List.generate(20, (_) => List.generate(4, (_) => false));
-  List<String> selectedSeats = [];
-  DateTime selectedDate = DateTime.now();
+  List<List<bool>> seats = List.generate(10, (_) => List.filled(4, false));
+  Set<String> selectedSeats = {};
+  late DateTime selectedDate;
+  late List<TrainSchedule> schedules;
+  int currentScheduleIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    selectedDate = widget.selectedDate;
+    schedules = [
+      TrainSchedule(
+        trainNumber: widget.trainNumber,
+        departureTime: widget.departureTime,
+        arrivalTime: widget.arrivalTime,
+        departureStation: '',
+        arrivalStation: '',
+      )
+    ];
+
+    // 애니메이션 컨트롤러 초기화
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+
+    // 애니메이션 설정
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
@@ -54,12 +70,45 @@ class _SeatPageState extends State<SeatPage>
       parent: _controller,
       curve: Curves.easeOut,
     ));
+
+    // 기타 초기화 코드...
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _showNoTrainAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('알림'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _changeTrainSchedule(int direction) {
+    setState(() {
+      int newIndex = currentScheduleIndex + direction;
+      if (newIndex >= 0 && newIndex < schedules.length) {
+        currentScheduleIndex = newIndex;
+      } else {
+        _showNoTrainAlert(direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.');
+      }
+    });
   }
 
   @override
@@ -75,37 +124,7 @@ class _SeatPageState extends State<SeatPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
-                        onPressed: () {
-                          // 이전 열차 로직 구현
-                        },
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            widget.trainNumber,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${DateFormat('HH:mm').format(widget.departureTime)} - ${DateFormat('HH:mm').format(widget.arrivalTime)}',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          // 다음 열차 로직 구현
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
+                  // 날짜 선택 위젯
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -115,6 +134,12 @@ class _SeatPageState extends State<SeatPage>
                           setState(() {
                             selectedDate =
                                 selectedDate.subtract(Duration(days: 1));
+                            schedules = TrainScheduleService.getSchedules(
+                              widget.departure,
+                              widget.arrival,
+                              selectedDate,
+                            );
+                            currentScheduleIndex = 0;
                           });
                         },
                       ),
@@ -128,8 +153,51 @@ class _SeatPageState extends State<SeatPage>
                         onPressed: () {
                           setState(() {
                             selectedDate = selectedDate.add(Duration(days: 1));
+                            schedules = TrainScheduleService.getSchedules(
+                              widget.departure,
+                              widget.arrival,
+                              selectedDate,
+                            );
+                            currentScheduleIndex = 0;
                           });
                         },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  // 열차 정보 위젯
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_ios),
+                        onPressed: currentScheduleIndex > 0
+                            ? () => _changeTrainSchedule(-1)
+                            : null,
+                        color:
+                            currentScheduleIndex > 0 ? null : Colors.grey[300],
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            schedules[currentScheduleIndex].trainNumber,
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${DateFormat('HH:mm').format(schedules[currentScheduleIndex].departureTime)} - ${DateFormat('HH:mm').format(schedules[currentScheduleIndex].arrivalTime)}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_forward_ios),
+                        onPressed: currentScheduleIndex < schedules.length - 1
+                            ? () => _changeTrainSchedule(1)
+                            : null,
+                        color: currentScheduleIndex < schedules.length - 1
+                            ? null
+                            : Colors.grey[300],
                       ),
                     ],
                   ),
@@ -273,7 +341,8 @@ class _SeatPageState extends State<SeatPage>
                                   builder: (context) => PaymentPage(
                                     departure: widget.departure,
                                     arrival: widget.arrival,
-                                    seatNumbers: selectedSeats,
+                                    seatNumbers:
+                                        selectedSeats.toList(), // Set을 List로 변환
                                     isRoundTrip: widget.isRoundTrip,
                                     travelDate: selectedDate,
                                     adultCount: widget.adultCount,
