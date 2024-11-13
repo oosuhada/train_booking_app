@@ -36,7 +36,7 @@ class _SeatPageState extends State<SeatPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
-  List<List<bool>> seats = List.generate(10, (_) => List.filled(4, false));
+  List<List<bool>> seats = List.generate(20, (_) => List.filled(4, false));
   Set<String> selectedSeats = {};
   late DateTime selectedDate;
   late List<TrainSchedule> schedules;
