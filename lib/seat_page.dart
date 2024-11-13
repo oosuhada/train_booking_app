@@ -248,8 +248,10 @@ class _SeatPageState extends State<SeatPage>
                   adultCount: widget.adultCount,
                   childCount: widget.childCount,
                   seniorCount: widget.seniorCount,
-                  departureSchedule: widget.departureSchedule,
-                  returnSchedule: widget.returnSchedule,
+                  departureSchedule:
+                      schedules[currentScheduleIndex], // 현재 선택된 스케줄
+                  returnSchedule:
+                      widget.isRoundTrip ? widget.returnSchedule : null,
                 ),
               ),
             );

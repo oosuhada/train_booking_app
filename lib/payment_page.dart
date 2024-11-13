@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'train_schedule.dart';
 import 'station_list.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -13,6 +14,8 @@ class PaymentPage extends StatefulWidget {
   final int adultCount;
   final int childCount;
   final int seniorCount;
+  final TrainSchedule departureSchedule;
+  final TrainSchedule? returnSchedule;
 
   PaymentPage({
     required this.departure,
@@ -25,6 +28,8 @@ class PaymentPage extends StatefulWidget {
     required this.adultCount,
     required this.childCount,
     required this.seniorCount,
+    required this.departureSchedule,
+    this.returnSchedule,
   });
 
   @override
@@ -73,24 +78,30 @@ class _PaymentPageState extends State<PaymentPage> {
               Text('예약 정보',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               SizedBox(height: 20),
-              _buildSectionWithDivider(' 일정 정보', [
-                ' 출발역: ${widget.departure}',
-                ' 도착역: ${widget.arrival}',
-                ' 날짜: ${DateFormat('yyyy년 MM월 dd일').format(widget.travelDate)}',
-                widget.isRoundTrip ? " 왕복" : " 편도",
+              _buildSectionWithDivider('일정 정보', [
+                '출발역: ${widget.departure}',
+                '도착역: ${widget.arrival}',
+                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.travelDate)})',
+                if (widget.isRoundTrip && widget.returnSchedule != null)
+                  '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.returnDate!)})',
+                widget.isRoundTrip ? "왕복" : "편도",
               ]),
               SizedBox(height: 10),
-              _buildSectionWithDivider(' 좌석 정보', [
-                ' 좌석: ${widget.seatNumbers.join(", ")}',
-                ' 어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
+              _buildSectionWithDivider('좌석 정보', [
+                '출발편 좌석: ${widget.seatNumbers.join(", ")}',
+                if (widget.isRoundTrip)
+                  '도착편 좌석: ${widget.returnSeatNumbers.join(", ")}',
+                '어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
               ]),
               SizedBox(height: 10),
-              _buildSectionWithDivider(' 가격 정보', [
-                ' 기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                ' 어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                ' 어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
-                ' 경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
-                ' 할인 전 가격: ${priceInfo.originalPrice}원',
+              _buildSectionWithDivider('가격 정보', [
+                '기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                '어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                '어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
+                '경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
+                if (widget.isRoundTrip)
+                  '왕복 요금: ${PriceInfo.getPrice(widget.departure, widget.arrival) * 2}원',
+                '할인 전 가격: ${priceInfo.originalPrice}원',
               ]),
               SizedBox(height: 15),
               Text('쿠폰 선택:',
