@@ -3,8 +3,16 @@ import 'station_list.dart';
 import 'passenger_selection.dart';
 import 'train_schedule.dart';
 import 'package:intl/intl.dart';
+import 'app_localizations.dart';
 
 class HomePage extends StatefulWidget {
+  final Function(Locale) onLanguageChanged;
+
+  const HomePage({
+    Key? key,
+    required this.onLanguageChanged,
+  }) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -20,10 +28,63 @@ class _HomePageState extends State<HomePage> {
   DateTime? returnDate;
 
   @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  void _initializeData() {
+    setState(() {
+      departureStation = '';
+      arrivalStation = '';
+      departureDate = DateTime.now();
+      returnDate = DateTime.now().add(const Duration(days: 1));
+      adultCount = 1;
+      childCount = 0;
+      seniorCount = 0;
+      isRoundTrip = false;
+    });
+  }
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('언어 선택 / Select Language'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: const Text('한국어'),
+                onTap: () {
+                  widget.onLanguageChanged(const Locale('ko'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: const Text('English'),
+                onTap: () {
+                  widget.onLanguageChanged(const Locale('en'));
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('K Rail', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+            AppLocalizations.of(context).translate('title', fallback: 'K Rail'),
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.purple,
         elevation: 0,
       ),
@@ -118,6 +179,32 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
+                    // 상단 탭 Row에 언어 선택 탭 추가
+                    Expanded(
+                        child: GestureDetector(
+                            onTap: _showLanguageDialog,
+                            child: Container(
+                              height: 70,
+                              margin: EdgeInsets.symmetric(horizontal: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.language, color: Colors.white),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    '언어 선택',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )))
                   ],
                 ),
               ),

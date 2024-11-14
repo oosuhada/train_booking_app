@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'home_page.dart';
+import 'app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -8,13 +9,36 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('ko');
+
+  void _changeLanguage(Locale newLocale) {
+    setState(() {
+      _locale = newLocale;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'K Rail',
+      locale: _locale,
+
+      localizationsDelegates: [
+        AppLocalizationsDelegate(),
+      ],
+      // 지원하는 언어 목록 추가
+      supportedLocales: const [
+        Locale('ko'),
+        Locale('en'),
+      ],
       theme: ThemeData(
         primarySwatch: Colors.purple,
         scaffoldBackgroundColor: Colors.white,
@@ -25,47 +49,69 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
-      home: SplashScreen(),
+      home: SplashScreen(onLanguageChanged: _changeLanguage),
     );
   }
 }
 
 class SplashScreen extends StatefulWidget {
+  final Function(Locale) onLanguageChanged;
+
+  const SplashScreen({
+    Key? key,
+    required this.onLanguageChanged,
+  }) : super(key: key);
+
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 3), () {
+    _navigateToHome();
+  }
+
+  void _navigateToHome() async {
+    await Future.delayed(const Duration(seconds: 3));
+    if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            onLanguageChanged: widget.onLanguageChanged,
+          ),
+        ),
       );
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'asset/KRAIL_LOGO.jpg',
-                width: 200,
-                height: 200,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'asset/KRAIL_LOGO.jpg',
+              width: 200,
+              height: 200,
+            ),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            Text(
+              '로딩중입니다...',
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
               ),
-              SizedBox(height: 20),
-              CircularProgressIndicator(),
-              SizedBox(height: 20),
-              Text('로딩중입니다...', style: TextStyle(fontSize: 18)),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
