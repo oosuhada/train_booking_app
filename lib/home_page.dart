@@ -4,6 +4,8 @@ import 'passenger_selection.dart';
 import 'train_schedule.dart';
 import 'package:intl/intl.dart';
 import 'app_localizations.dart';
+import 'package:country_flags/country_flags.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class HomePage extends StatefulWidget {
   final Function(Locale) onLanguageChanged;
@@ -35,8 +37,8 @@ class _HomePageState extends State<HomePage> {
 
   void _initializeData() {
     setState(() {
-      departureStation = '';
-      arrivalStation = '';
+      departureStation;
+      arrivalStation;
       departureDate = DateTime.now();
       returnDate = DateTime.now().add(const Duration(days: 1));
       adultCount = 1;
@@ -51,12 +53,16 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('언어 선택 / Select Language'),
+          title: Text(AppLocalizations.of(context).translate('language')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.language),
+                leading: CountryFlag.fromCountryCode(
+                  'KR',
+                  height: 24,
+                  width: 40,
+                ),
                 title: const Text('한국어'),
                 onTap: () {
                   widget.onLanguageChanged(const Locale('ko'));
@@ -64,10 +70,38 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.language),
+                leading: CountryFlag.fromCountryCode(
+                  'GB',
+                  height: 24,
+                  width: 40,
+                ),
                 title: const Text('English'),
                 onTap: () {
                   widget.onLanguageChanged(const Locale('en'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: CountryFlag.fromCountryCode(
+                  'JP',
+                  height: 24,
+                  width: 40,
+                ),
+                title: const Text('日本語'),
+                onTap: () {
+                  widget.onLanguageChanged(const Locale('ja'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: CountryFlag.fromCountryCode(
+                  'CN',
+                  height: 24,
+                  width: 40,
+                ),
+                title: const Text('中文'),
+                onTap: () {
+                  widget.onLanguageChanged(const Locale('zh'));
                   Navigator.pop(context);
                 },
               ),
@@ -82,8 +116,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            AppLocalizations.of(context).translate('title', fallback: 'K Rail'),
+        title: Text(AppLocalizations.of(context).translate('K-Rail 간편 서비스'),
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.purple,
         elevation: 0,
@@ -111,24 +144,25 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '승차권 예매',
+                            AppLocalizations.of(context).translate('승차권 예매'),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(height: 5),
+                          SizedBox(height: 3),
                           Text(
-                            '편리한 기차 예매 서비스',
+                            'Convenient Booking',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               color: Colors.white.withOpacity(0.8),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    SizedBox(width: 5),
                     // 승차권 관리 탭
                     Expanded(
                       child: Container(
@@ -144,9 +178,9 @@ class _HomePageState extends State<HomePage> {
                             Icon(Icons.article, color: Colors.white),
                             SizedBox(height: 5),
                             Text(
-                              '승차권 관리',
+                              AppLocalizations.of(context).translate('승차권 관리'),
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 color: Colors.white,
                               ),
                             ),
@@ -158,7 +192,7 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: Container(
                         height: 70,
-                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        margin: EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(15),
@@ -169,9 +203,9 @@ class _HomePageState extends State<HomePage> {
                             Icon(Icons.location_on, color: Colors.white),
                             SizedBox(height: 5),
                             Text(
-                              '열차위치 확인',
+                              AppLocalizations.of(context).translate('열차위치 확인'),
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 color: Colors.white,
                               ),
                             ),
@@ -196,9 +230,9 @@ class _HomePageState extends State<HomePage> {
                                   Icon(Icons.language, color: Colors.white),
                                   SizedBox(height: 5),
                                   Text(
-                                    '언어 선택',
+                                    'Language',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -247,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '더보기',
+                            AppLocalizations.of(context).translate('더보기'),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -276,7 +310,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('날짜 선택',
+        Text(AppLocalizations.of(context).translate('날짜 선택'),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         SizedBox(height: 10),
         Row(
@@ -287,7 +321,9 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: _buildDateButton('가는 날', departureDate, (picked) {
+                child: _buildDateButton(
+                    AppLocalizations.of(context).translate('가는 날'),
+                    departureDate, (picked) {
                   setState(() {
                     departureDate = picked;
                     // 가는 날이 오는 날보다 늦으면 오는 날을 null로 설정
@@ -308,7 +344,9 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: _buildDateButton('오는 날', returnDate, (picked) {
+                  child: _buildDateButton(
+                      AppLocalizations.of(context).translate('오는 날'),
+                      returnDate, (picked) {
                     setState(() {
                       if (departureDate != null &&
                           !picked!.isBefore(departureDate!)) {
@@ -339,6 +377,7 @@ class _HomePageState extends State<HomePage> {
           initialDate: date ?? DateTime.now(),
           firstDate: DateTime.now(),
           lastDate: DateTime.now().add(Duration(days: 365)),
+          locale: Localizations.localeOf(context),
         );
         if (picked != null && picked != date) {
           onPicked(picked);
@@ -370,7 +409,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white30,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(
@@ -397,7 +436,9 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                 child: _buildStationButton(
-                    '출발역', departureStation, arrivalStation),
+                    AppLocalizations.of(context).translate('출발역'),
+                    departureStation,
+                    arrivalStation),
               ),
               Container(
                 width: 2,
@@ -406,7 +447,9 @@ class _HomePageState extends State<HomePage> {
               ),
               Expanded(
                 child: _buildStationButton(
-                    '도착역', arrivalStation, departureStation),
+                    AppLocalizations.of(context).translate('도착역'),
+                    arrivalStation,
+                    departureStation),
               ),
             ],
           ),
@@ -446,7 +489,7 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
           ),
           SizedBox(height: 10),
-          Text(station ?? '선택',
+          Text(station ?? AppLocalizations.of(context).translate('선택'),
               style: TextStyle(
                 fontSize: 40,
                 color: station == null
@@ -485,29 +528,59 @@ class _HomePageState extends State<HomePage> {
             }
           },
           child: Text(
-            '인원 선택: 어른 $adultCount명${childCount > 0 ? ', 어린이 $childCount명' : ''}${seniorCount > 0 ? ', 경로 $seniorCount명' : ''}',
+            AppLocalizations.of(context).translate('인원 선택') +
+                ': ' +
+                AppLocalizations.of(context).translate('어른') +
+                ' $adultCount' +
+                (childCount > 0
+                    ? ', ' +
+                        AppLocalizations.of(context).translate('어린이') +
+                        ' $childCount'
+                    : '') +
+                (seniorCount > 0
+                    ? ', ' +
+                        AppLocalizations.of(context).translate('경로') +
+                        ' $seniorCount'
+                    : ''),
             style: TextStyle(fontSize: 16),
           ),
         ),
+        SizedBox(width: 15),
         Row(
           children: [
-            Text('편도'),
+            Expanded(
+              child: _buildAutoSizeText('편도'),
+            ),
             Switch(
               value: isRoundTrip,
               onChanged: (value) {
                 setState(() {
                   isRoundTrip = value;
                   if (isRoundTrip) {
-                    returnDate = departureDate
-                        ?.add(Duration(days: 1)); // 기본값으로 출발일 다음날 설정
+                    returnDate = departureDate?.add(Duration(days: 1));
                   }
                 });
               },
             ),
-            Text('왕복'),
+            Expanded(
+              child: _buildAutoSizeText('왕복'),
+            ),
           ],
-        ),
+        )
       ],
+    );
+  }
+
+  Widget _buildAutoSizeText(String key) {
+    final locale = Localizations.localeOf(context);
+    final isEnglish = locale.languageCode == 'en';
+
+    return AutoSizeText(
+      AppLocalizations.of(context).translate(key),
+      maxLines: 1,
+      minFontSize: isEnglish ? 4 : 14, // 영어일 때 최소 폰트 크기를 더 작게 설정
+      style: TextStyle(fontSize: isEnglish ? 4 : 16), // 영어일 때 기본 폰트 크기를 작게 설정
+      textAlign: isEnglish ? TextAlign.center : TextAlign.center,
     );
   }
 
@@ -524,7 +597,10 @@ class _HomePageState extends State<HomePage> {
             ? () {
                 if (isRoundTrip && returnDate == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('왕복 여정의 경우 오는 날을 선택해주세요.')),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)
+                          .translate('return_date_error')),
+                    ),
                   );
                   return;
                 }
@@ -548,7 +624,7 @@ class _HomePageState extends State<HomePage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15.0),
           child: Text(
-            '예매하기',
+            AppLocalizations.of(context).translate('예매하기'),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
