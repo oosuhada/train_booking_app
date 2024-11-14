@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'train_schedule.dart';
 import 'station_list.dart';
+import 'app_localizations.dart';
 
 class PaymentPage extends StatefulWidget {
   final String departure;
@@ -72,41 +73,45 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('결제하기')),
+      appBar:
+          AppBar(title: Text(AppLocalizations.of(context).translate('결제하기'))),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('예약 정보',
+              Text(AppLocalizations.of(context).translate('예약 정보'),
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               SizedBox(height: 20),
-              _buildSectionWithDivider('일정 정보', [
-                '출발역: ${widget.departure}',
-                '도착역: ${widget.arrival}',
-                '출발편: ${widget.departureSchedule?.trainNumber} (${DateFormat('yy년 MM월 dd일').format(widget.selectedDepartureDate)})',
+              _buildSectionWithDivider(
+                  AppLocalizations.of(context).translate('일정 정보'), [
+                '${AppLocalizations.of(context).translate('출발역')}: ${widget.departure}',
+                '${AppLocalizations.of(context).translate('도착역')}: ${widget.arrival}',
+                '${AppLocalizations.of(context).translate('출발편')}: ${widget.departureSchedule?.trainNumber} (${DateFormat('yy년 MM월 dd일').format(widget.selectedDepartureDate)})',
                 if (widget.isRoundTrip && widget.returnSchedule != null)
-                  '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yy년 MM월 dd일').format(widget.selectedReturnDate!)})',
+                  '${AppLocalizations.of(context).translate('도착편')}: ${widget.returnSchedule!.trainNumber} (${DateFormat('yy년 MM월 dd일').format(widget.selectedReturnDate!)})',
               ]),
               SizedBox(height: 10),
-              _buildSectionWithDivider('좌석 정보', [
-                '출발편 좌석: ${widget.seatNumbers.join(", ")}',
+              _buildSectionWithDivider(
+                  AppLocalizations.of(context).translate('좌석 정보'), [
+                '${AppLocalizations.of(context).translate('출발편 좌석')}: ${widget.seatNumbers.join(", ")}',
                 if (widget.isRoundTrip)
-                  '도착편 좌석: ${widget.returnSeatNumbers.join(", ")}',
-                '어른: ${widget.adultCount}명, 어린이: ${widget.childCount}명, 경로: ${widget.seniorCount}명',
+                  '${AppLocalizations.of(context).translate('도착편 좌석')}: ${widget.returnSeatNumbers.join(", ")}',
+                '${AppLocalizations.of(context).translate('어른')}: ${widget.adultCount}명, ${AppLocalizations.of(context).translate('어린이')}: ${widget.childCount}명, ${AppLocalizations.of(context).translate('경로')}: ${widget.seniorCount}명',
               ]),
               SizedBox(height: 10),
               SizedBox(height: 10),
-              _buildSectionWithDivider(' 가격 정보', [
-                '기본 편도 가격: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어른 (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
-                '어린이 (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
-                '경로 (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
-                '할인 전 가격: ${priceInfo.originalPrice}원',
+              _buildSectionWithDivider(
+                  AppLocalizations.of(context).translate('가격 정보'), [
+                '${AppLocalizations.of(context).translate('기본 편도 가격')}: ${PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                '${AppLocalizations.of(context).translate('어른')} (${widget.adultCount}명): ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}원',
+                '${AppLocalizations.of(context).translate('어린이')} (${widget.childCount}명): ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}원',
+                '${AppLocalizations.of(context).translate('경로')} (${widget.seniorCount}명): ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}원',
+                '${AppLocalizations.of(context).translate('할인 전 가격')}: ${priceInfo.originalPrice}원',
               ]),
               SizedBox(height: 15),
-              Text('쿠폰 선택:',
+              Text(AppLocalizations.of(context).translate('쿠폰 선택'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               DropdownButton<String>(
                 value: selectedCoupon,
@@ -114,16 +119,19 @@ class _PaymentPageState extends State<PaymentPage> {
                     [null, '10% 할인', '15% 할인', '20% 할인'].map((String? value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value ?? '쿠폰 선택'),
+                    child: Text(value ??
+                        AppLocalizations.of(context).translate('쿠폰 선택')),
                   );
                 }).toList(),
                 onChanged: applyCoupon,
               ),
               SizedBox(height: 15),
-              Text('할인 유형: ${priceInfo.discountType}',
+              Text(
+                  '${AppLocalizations.of(context).translate('할인 유형')}: ${priceInfo.discountType}',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text('최종 가격: ${priceInfo.discountedPrice}원',
+              Text(
+                  '${AppLocalizations.of(context).translate('최종 가격')}: ${priceInfo.discountedPrice}원',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
@@ -142,7 +150,7 @@ class _PaymentPageState extends State<PaymentPage> {
               children: [
                 Icon(Icons.payment, color: Colors.white),
                 SizedBox(width: 10),
-                Text('결제하기',
+                Text(AppLocalizations.of(context).translate('결제하기'),
                     style: TextStyle(fontSize: 18, color: Colors.white)),
               ],
             ),

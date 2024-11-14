@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'payment_page.dart';
 import 'train_schedule.dart';
+import 'app_localizations.dart';
 
 // Part 1 - 클래스 선언부터 build 메서드 시작
 class SeatPage extends StatefulWidget {
