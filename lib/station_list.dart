@@ -22,7 +22,8 @@ class StationListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('역 선택')),
+      appBar:
+          AppBar(title: Text(AppLocalizations.of(context).translate('역 선택'))),
       body: ListView.builder(
         itemCount: stations.length,
         itemBuilder: (context, index) {
@@ -30,7 +31,7 @@ class StationListPage extends StatelessWidget {
             return Container();
           }
           return ListTile(
-            title: Text(stations[index],
+            title: Text(AppLocalizations.of(context).translate(stations[index]),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             onTap: () {
               Navigator.pop(context, stations[index]);
@@ -152,6 +153,7 @@ class PriceCalculator {
     int childCount,
     int seniorCount,
     String? coupon,
+    BuildContext context,
   ) {
     int basePrice = PriceInfo.getPrice(departure, arrival);
     int totalPrice = 0;
@@ -163,21 +165,24 @@ class PriceCalculator {
     }
 
     int originalPrice = totalPrice;
-    String discountType = '할인 없음';
+    String discountType = AppLocalizations.of(context).translate('할인 없음');
 
     if (coupon != null) {
       switch (coupon) {
         case '10% 할인':
           totalPrice = (totalPrice * 0.9).round();
-          discountType = '10% 할인 쿠폰';
+          discountType =
+              '${AppLocalizations.of(context).translate('10% 할인')} ${AppLocalizations.of(context).translate('쿠폰')}';
           break;
         case '15% 할인':
           totalPrice = (totalPrice * 0.85).round();
-          discountType = '15% 할인 쿠폰';
+          discountType =
+              '${AppLocalizations.of(context).translate('15% 할인')} ${AppLocalizations.of(context).translate('쿠폰')}';
           break;
         case '20% 할인':
           totalPrice = (totalPrice * 0.8).round();
-          discountType = '20% 할인 쿠폰';
+          discountType =
+              '${AppLocalizations.of(context).translate('20% 할인')} ${AppLocalizations.of(context).translate('쿠폰')}';
           break;
       }
     }
