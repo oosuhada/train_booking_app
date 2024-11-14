@@ -268,7 +268,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
               fontSize: 16,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey // 다크 모드일 때 그레이 명시
+                  ? Colors.black87 // 다크 모드일 때 그레이 명시
                   : Colors.grey // 라이트 모드일 때도 그레이로 명시
               ),
         ),
@@ -356,10 +356,15 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
           ),
           SizedBox(height: 10),
-          Text(
-            station ?? '선택',
-            style: TextStyle(fontSize: 40),
-          ),
+          Text(station ?? '선택',
+              style: TextStyle(
+                fontSize: 40,
+                color: station == null
+                    ? Colors.grey // '선택' 텍스트의 색상
+                    : Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black87 // 다크 모드에서 선택된 역 이름 색상
+                        : Colors.black87, // 라이트 모드에서 선택된 역 이름 색상
+              )),
         ],
       ),
     );
