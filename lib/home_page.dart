@@ -244,7 +244,9 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[800] // 다크모드일 때
+                      : Colors.grey[200], // 라이트모드일 때
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _buildDateButton(
@@ -389,8 +391,18 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: date != null ? Colors.white : null, // 날짜 선택 시 흰색 배경
-          border: Border.all(color: Colors.grey),
+          // 다크모드 대응을 위한 배경색 설정
+          color: date != null
+              ? Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800] // 다크모드에서 선택 시 어두운 회색
+                  : Colors.white // 라이트모드에서 선택 시 흰색
+              : null,
+          border: Border.all(
+            // 테두리 색상도 다크모드에 맞게 조정
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[600]! // 다크모드에서의 테두리
+                : Colors.grey, // 라이트모드에서의 테두리
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -400,8 +412,8 @@ class _HomePageState extends State<HomePage> {
             color: date == null
                 ? Colors.grey // 날짜 미선택 시 회색
                 : Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black87 // 다크 모드에서 날짜 선택 시 진한 검정
-                    : Colors.black87, // 라이트 모드에서 날짜 선택 시 진한 검정
+                    ? Colors.white // 다크모드에서 날짜 선택 시 흰색
+                    : Colors.black87, // 라이트모드에서 날짜 선택 시 검정
           ),
         ),
       ),
@@ -505,7 +517,14 @@ class _HomePageState extends State<HomePage> {
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   height: 1.2, // 줄 간격 조정
-                  color: station != null ? Colors.black : Colors.grey[600],
+
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? station != null
+                          ? Colors.white
+                          : Colors.grey[400] // 다크모드일 때
+                      : station != null
+                          ? Colors.black
+                          : Colors.grey[600], // 라이트모드일 때
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
