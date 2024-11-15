@@ -81,6 +81,7 @@ class _SeatPageState extends State<SeatPage>
   List<TrainSchedule>? returnSchedules;
   // 승객 유형별 선택된 좌석수를 추적하는 맵
   late Map<String, List<String>> selectedSeatsByType;
+  late Map<String, List<String>> selectedReturnSeatsByType;
   // 승객 유형별 좌석 지정 순서
   List<String> passengerOrder = ['어른', '어린이', '경로'];
 
@@ -117,6 +118,11 @@ class _SeatPageState extends State<SeatPage>
 
     // selectedSeatsByType 초기화
     selectedSeatsByType = {
+      '어른': [],
+      '어린이': [],
+      '경로': [],
+    };
+    selectedReturnSeatsByType = {
       '어른': [],
       '어린이': [],
       '경로': [],
@@ -553,26 +559,24 @@ class _SeatPageState extends State<SeatPage>
   //좌석 선택 시 bottom panel에 실시간으로 선택 좌석 표시하는 메서드
   List<Widget> _buildPassengerTypeInfo() {
     List<Widget> widgets = [];
+    Map<String, List<String>> currentSelectedSeatsByType =
+        isSelectingReturn ? selectedReturnSeatsByType : selectedSeatsByType;
 
     for (String type in passengerOrder) {
       int count = _getPassengerTypeCount(type);
       if (count > 0) {
-        List<String> typeSeats = selectedSeatsByType[type] ?? [];
+        List<String> typeSeats = currentSelectedSeatsByType[type] ?? [];
         widgets.add(
           Padding(
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
-              '${AppLocalizations.of(context).translate(type)}: '
-              '${count}  '
-              '(${AppLocalizations.of(context).translate('선택됨')}: '
-              '${typeSeats.isEmpty ? "-" : typeSeats.join(", ")})',
+              '${AppLocalizations.of(context).translate(type)} ${count} : ${typeSeats.isEmpty ? "-" : typeSeats.join(", ")}',
               style: TextStyle(fontSize: 16),
             ),
           ),
         );
       }
     }
-
     return widgets;
   }
 
@@ -619,14 +623,16 @@ class _SeatPageState extends State<SeatPage>
 
   // 선택된 좌석을 추가하는 메서드 수정
   void _addSeat(String seatNumber) {
+    Map<String, List<String>> currentSelectedSeatsByType =
+        isSelectingReturn ? selectedReturnSeatsByType : selectedSeatsByType;
+
     for (String type in passengerOrder) {
       int typeCount = _getPassengerTypeCount(type);
-      List<String> typeSeats = selectedSeatsByType[type] ?? [];
-
+      List<String> typeSeats = currentSelectedSeatsByType[type] ?? [];
       if (typeSeats.length < typeCount) {
         setState(() {
-          selectedSeatsByType[type] ??= [];
-          selectedSeatsByType[type]!.add(seatNumber);
+          currentSelectedSeatsByType[type] ??= [];
+          currentSelectedSeatsByType[type]!.add(seatNumber);
         });
         break;
       }
@@ -635,10 +641,13 @@ class _SeatPageState extends State<SeatPage>
 
   // 선택된 좌석을 제거하는 메서드 수정
   void _removeSeat(String seatNumber) {
+    Map<String, List<String>> currentSelectedSeatsByType =
+        isSelectingReturn ? selectedReturnSeatsByType : selectedSeatsByType;
+
     setState(() {
       for (String type in passengerOrder) {
-        if (selectedSeatsByType[type]?.contains(seatNumber) ?? false) {
-          selectedSeatsByType[type]!.remove(seatNumber);
+        if (currentSelectedSeatsByType[type]?.contains(seatNumber) ?? false) {
+          currentSelectedSeatsByType[type]!.remove(seatNumber);
           break;
         }
       }
