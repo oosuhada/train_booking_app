@@ -221,22 +221,21 @@ class _SeatPageState extends State<SeatPage>
                             Text(
                               '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} '
                               ' - '
-                              '${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}',
+                              '${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule.arrivalTime)}',
                             ),
                           ],
                         ),
                       ),
                       IconButton(
                         icon: Icon(Icons.arrow_forward_ios),
-                        onPressed:
-                            (schedules != null && currentSchedule != null)
-                                ? (schedules.indexOf(currentSchedule) <
-                                        schedules.length - 1
-                                    ? () => _changeTrainSchedule(1)
-                                    : null)
-                                : null,
+                        onPressed: (schedules != null)
+                            ? (schedules.indexOf(currentSchedule) <
+                                    schedules.length - 1
+                                ? () => _changeTrainSchedule(1)
+                                : null)
+                            : null,
                         color: schedules != null &&
-                                schedules.indexOf(currentSchedule!) <
+                                schedules.indexOf(currentSchedule) <
                                     schedules.length - 1
                             ? null
                             : Colors.grey[300],
@@ -420,7 +419,8 @@ class _SeatPageState extends State<SeatPage>
                         ),
                       );
                     },
-                  )
+                  ),
+                  SizedBox(height: 100)
                 ],
               ),
             ),
@@ -444,7 +444,7 @@ class _SeatPageState extends State<SeatPage>
         children: [
           Text('${currentSchedule?.trainNumber}'),
           Text(
-              '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} ${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}'),
+              '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} ${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule.arrivalTime)}'),
         ],
       ),
     );

@@ -202,12 +202,7 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom:
-                              BorderSide(color: Colors.grey[300]!, width: 1),
-                        ),
-                      ),
+                      decoration: BoxDecoration(),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -222,7 +217,7 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 0),
+                    SizedBox(height: 5),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(15),
                       child: _buildLogoContainer(),
