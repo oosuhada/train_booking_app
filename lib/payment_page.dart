@@ -73,6 +73,12 @@ class _PaymentPageState extends State<PaymentPage> {
     });
   }
 
+  //가격 표시 포맷을 위한 유틸리티 함수
+  String formatPrice(dynamic price) {
+    NumberFormat numberFormat = NumberFormat('#,###');
+    return numberFormat.format(price);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,14 +119,14 @@ class _PaymentPageState extends State<PaymentPage> {
               SizedBox(height: 10),
               _buildSectionWithDivider(
                   AppLocalizations.of(context).translate('가격 정보'), [
-                '${AppLocalizations.of(context).translate('기본 편도 가격')}: ${PriceInfo.getPrice(widget.departure, widget.arrival)}${AppLocalizations.of(context).translate('원')}',
+                '${AppLocalizations.of(context).translate('기본 편도 가격')}: ${formatPrice(PriceInfo.getPrice(widget.departure, widget.arrival))}${AppLocalizations.of(context).translate('원')}',
                 if (widget.adultCount > 0)
-                  '${AppLocalizations.of(context).translate('어른')}: ${widget.adultCount}  ${widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival)}${AppLocalizations.of(context).translate('원')}',
+                  '${AppLocalizations.of(context).translate('어른')} ${widget.adultCount} : ${formatPrice(widget.adultCount * PriceInfo.getPrice(widget.departure, widget.arrival))}${AppLocalizations.of(context).translate('원')}',
                 if (widget.childCount > 0)
-                  '${AppLocalizations.of(context).translate('어린이')}: ${widget.childCount}  ${(widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round()}${AppLocalizations.of(context).translate('원')}',
+                  '${AppLocalizations.of(context).translate('어린이')} ${widget.childCount} : ${formatPrice((widget.childCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.5).round())}${AppLocalizations.of(context).translate('원')}',
                 if (widget.seniorCount > 0)
-                  '${AppLocalizations.of(context).translate('경로')}: ${widget.seniorCount}  ${(widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round()}${AppLocalizations.of(context).translate('원')}',
-                '${AppLocalizations.of(context).translate('할인 전 가격')}: ${priceInfo.originalPrice}${AppLocalizations.of(context).translate('원')}',
+                  '${AppLocalizations.of(context).translate('경로')} ${widget.seniorCount} : ${formatPrice((widget.seniorCount * PriceInfo.getPrice(widget.departure, widget.arrival) * 0.7).round())}${AppLocalizations.of(context).translate('원')}',
+                '${AppLocalizations.of(context).translate('할인 전 가격')}: ${formatPrice(priceInfo.originalPrice)}${AppLocalizations.of(context).translate('원')}',
               ]),
               SizedBox(height: 15),
               Text(AppLocalizations.of(context).translate('쿠폰 선택'),
@@ -170,7 +176,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${priceInfo.discountedPrice}${AppLocalizations.of(context).translate('원')}',
+                  '${formatPrice(priceInfo.discountedPrice)}${AppLocalizations.of(context).translate('원')}',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
