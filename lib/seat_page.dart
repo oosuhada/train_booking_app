@@ -253,31 +253,33 @@ class _SeatPageState extends State<SeatPage>
                             icon: Icon(Icons.arrow_back_ios, size: 12),
                             onPressed: () {
                               DateTime today = DateTime.now();
-                              if (selectedDepartureDate
-                                  .isBefore(today.add(Duration(days: 1)))) {
-                                _showNoTrainAlert(AppLocalizations.of(context)
-                                    .translate('더 이전 날짜는 선택할 수 없습니다.'));
-                                return;
-                              }
-                              setState(() {
-                                selectedDepartureDate = selectedDepartureDate
-                                    .subtract(Duration(days: 1));
-                                allSchedules =
-                                    TrainScheduleService.getSchedules(
-                                        widget.departure,
-                                        widget.arrival,
-                                        selectedDepartureDate,
-                                        null // returnDate는 null로 설정 (편도 여정이므로)
-                                        );
-                                departureSchedules =
-                                    allSchedules['departure'] ?? [];
-                                if (departureSchedules.isNotEmpty) {
-                                  departureSchedule = departureSchedules.first;
+                              DateTime? minDate = isSelectingReturn
+                                  ? widget.selectedDepartureDate
+                                  : today;
+                              if (isSelectingReturn) {
+                                if (selectedReturnDate!.isAfter(minDate!)) {
+                                  setState(() {
+                                    selectedReturnDate = selectedReturnDate!
+                                        .subtract(Duration(days: 1));
+                                    _updateSchedules();
+                                  });
                                 } else {
-                                  // 스케줄이 없는 경우 처리
-                                  departureSchedule = null;
+                                  _showNoTrainAlert(AppLocalizations.of(context)
+                                      .translate('도착일은 출발일 이후여야 합니다.'));
                                 }
-                              });
+                              } else {
+                                if (selectedDepartureDate.isAfter(minDate!)) {
+                                  setState(() {
+                                    selectedDepartureDate =
+                                        selectedDepartureDate
+                                            .subtract(Duration(days: 1));
+                                    _updateSchedules();
+                                  });
+                                } else {
+                                  _showNoTrainAlert(AppLocalizations.of(context)
+                                      .translate('더 이전 날짜는 선택할 수 없습니다.'));
+                                }
+                              }
                             },
                           ),
                           Text(
@@ -293,7 +295,9 @@ class _SeatPageState extends State<SeatPage>
                                     getLocalizedDateFormat(context),
                                     Localizations.localeOf(context)
                                         .languageCode)
-                                .format(selectedDepartureDate),
+                                .format(isSelectingReturn
+                                    ? selectedReturnDate!
+                                    : selectedDepartureDate),
                             style: TextStyle(fontSize: 14),
                           ),
                         ],
@@ -304,23 +308,14 @@ class _SeatPageState extends State<SeatPage>
                             icon: Icon(Icons.arrow_forward_ios, size: 12),
                             onPressed: () {
                               setState(() {
-                                selectedDepartureDate = selectedDepartureDate
-                                    .subtract(Duration(days: 1));
-                                allSchedules =
-                                    TrainScheduleService.getSchedules(
-                                        widget.departure,
-                                        widget.arrival,
-                                        selectedDepartureDate,
-                                        null // returnDate는 null로 설정 (편도 여정이므로)
-                                        );
-                                departureSchedules =
-                                    allSchedules['departure'] ?? [];
-                                if (departureSchedules.isNotEmpty) {
-                                  departureSchedule = departureSchedules.first;
+                                if (isSelectingReturn) {
+                                  selectedReturnDate = selectedReturnDate!
+                                      .add(Duration(days: 1));
                                 } else {
-                                  // 스케줄이 없는 경우 처리
-                                  departureSchedule = null;
+                                  selectedDepartureDate = selectedDepartureDate
+                                      .add(Duration(days: 1));
                                 }
+                                _updateSchedules();
                               });
                             },
                           ),
@@ -448,6 +443,23 @@ class _SeatPageState extends State<SeatPage>
         ],
       ),
     );
+  }
+
+  //날짜 이동 관련 메서드
+  void _updateSchedules() {
+    allSchedules = TrainScheduleService.getSchedules(
+        widget.departure,
+        widget.arrival,
+        selectedDepartureDate,
+        null // returnDate는 null로 설정 (편도 여정이므로)
+        );
+    departureSchedules = allSchedules['departure'] ?? [];
+    if (departureSchedules.isNotEmpty) {
+      departureSchedule = departureSchedules.first;
+    } else {
+      // 스케줄이 없는 경우 처리
+      departureSchedule = null;
+    }
   }
 
   // 하단 패널 위젯 빌드 메서드

@@ -505,6 +505,7 @@ class _HomePageState extends State<HomePage> {
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   height: 1.2, // 줄 간격 조정
+                  color: station != null ? Colors.black : Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
