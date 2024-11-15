@@ -280,7 +280,41 @@ class _HomePageState extends State<HomePage> {
                       } else {
                         // 오는 날이 가는 날보다 빠르면 경고 메시지 표시
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('오는 날은 가는 날 이후여야 합니다.')),
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)
+                                  .translate('오는 날은 가는 날 이후여야 합니다.'),
+                              style: TextStyle(
+                                fontSize: 18, // 글자 크기를 키웁니다
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[800] // 다크 테마일 때의 배경색
+                                    : Colors.grey[200], // 라이트 테마일 때의 배경색
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: EdgeInsets.all(16),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 16),
+                            duration: Duration(seconds: 4),
+                            action: SnackBarAction(
+                              label:
+                                  AppLocalizations.of(context).translate('확인'),
+                              textColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              onPressed: () {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                              },
+                            ),
+                          ),
                         );
                       }
                     });
