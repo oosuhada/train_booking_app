@@ -8,9 +8,9 @@ class PaymentPage extends StatefulWidget {
   final String arrival;
   final List<String> seatNumbers;
   final List<String> returnSeatNumbers;
+  final DateTime travelDate;
   final DateTime? returnDate;
   final bool isRoundTrip;
-  final DateTime travelDate;
   final int adultCount;
   final int childCount;
   final int seniorCount;
@@ -24,9 +24,9 @@ class PaymentPage extends StatefulWidget {
     required this.arrival,
     required this.seatNumbers,
     required this.returnSeatNumbers,
+    required this.travelDate,
     this.returnDate,
     required this.isRoundTrip,
-    required this.travelDate,
     required this.adultCount,
     required this.childCount,
     required this.seniorCount,
@@ -98,8 +98,6 @@ class _PaymentPageState extends State<PaymentPage> {
               ]),
               SizedBox(height: 10),
               _buildSectionWithDivider('일정 정보', [
-                '출발역: ${widget.departure}',
-                '도착역: ${widget.arrival}',
                 '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule.departureTime)} - ${DateFormat('HH:mm').format(widget.departureSchedule.arrivalTime)})',
                 if (widget.isRoundTrip && widget.returnSchedule != null)
                   '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.returnSchedule!.departureTime)} - ${DateFormat('HH:mm').format(widget.returnSchedule!.arrivalTime)})',

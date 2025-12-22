@@ -117,12 +117,13 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     setState(() {
       if (isReturn) {
         selectedReturnSchedule = schedule;
-        _navigateToSeatSelection(isReturn: true);
+        // 도착편 선택 후 버튼으로 좌석 선택 진행
       } else {
         selectedDepartureSchedule = schedule;
         if (!widget.isRoundTrip) {
-          _navigateToSeatSelection(isReturn: false);
+          _startSeatSelection();
         } else {
+          // 왕복인 경우 도착편 탭으로 전환
           isShowingReturn = true;
           _tabController.animateTo(1);
         }
@@ -130,9 +131,17 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     });
   }
 
-  void _navigateToSeatSelection({bool isReturn = false}) {
-    if (isReturn && selectedReturnSchedule == null) return;
-    if (!isReturn && selectedDepartureSchedule == null) return;
+// 좌석 선택 시작 메서드 추가
+  void _startSeatSelection() {
+    if (widget.isRoundTrip && selectedReturnSchedule == null) return;
+
+    // 출발편 좌석 선택부터 시작
+    _navigateToSeatSelection(isReturn: false);
+  }
+
+  void _navigateToSeatSelection({required bool isReturn}) {
+    TrainSchedule currentSchedule =
+        isReturn ? selectedReturnSchedule! : selectedDepartureSchedule!;
 
     Navigator.push(
       context,
@@ -140,28 +149,19 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
         builder: (context) => SeatPage(
           departure: widget.departureStation,
           arrival: widget.arrivalStation,
-          departureStation:
-              isReturn ? widget.arrivalStation : widget.departureStation,
-          arrivalStation:
-              isReturn ? widget.departureStation : widget.arrivalStation,
+          departureStation: currentSchedule.departureStation,
+          arrivalStation: currentSchedule.arrivalStation,
           adultCount: widget.adultCount,
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
-          selectedDate: isReturn ? widget.returnDate! : widget.departureDate,
-          departureTime: isReturn
-              ? selectedReturnSchedule!.departureTime
-              : selectedDepartureSchedule!.departureTime,
-          arrivalTime: isReturn
-              ? selectedReturnSchedule!.arrivalTime
-              : selectedDepartureSchedule!.arrivalTime,
-          trainNumber: isReturn
-              ? selectedReturnSchedule!.trainNumber
-              : selectedDepartureSchedule!.trainNumber,
+          selectedDate: widget.departureDate,
+          departureTime: currentSchedule.departureTime,
+          arrivalTime: currentSchedule.arrivalTime,
+          trainNumber: currentSchedule.trainNumber,
           departureSchedule: selectedDepartureSchedule!,
           returnSchedule: selectedReturnSchedule,
-          selectedSchedule:
-              isReturn ? selectedReturnSchedule! : selectedDepartureSchedule!,
+          selectedSchedule: currentSchedule,
           selectedDepartureDate: widget.departureDate,
           selectedReturnDate: widget.returnDate,
         ),
@@ -192,35 +192,60 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     );
   }
 
+  // 도착편 선택 후 좌석 선택 버튼 위젯
   Widget _buildScheduleList(List<TrainSchedule> schedules, bool isReturn) {
-    if (schedules.isEmpty) {
-      return Center(
-        child: Text('해당 날짜에 스케줄이 없습니다.'),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: schedules.length,
-      itemBuilder: (context, index) {
-        TrainSchedule schedule = schedules[index];
-        Duration duration =
-            schedule.arrivalTime.difference(schedule.departureTime);
-        String durationStr =
-            '${duration.inHours}시간 ${duration.inMinutes % 60}분';
-
-        return ListTile(
-          title: Text('${schedule.trainNumber}'),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 3),
-              Text(
-                  '출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, 도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} 소요시간: $durationStr'),
-            ],
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: schedules.length,
+            itemBuilder: (context, index) =>
+                _buildScheduleItem(schedules[index], isReturn),
           ),
-          onTap: () => _selectSchedule(schedule, isReturn),
-        );
-      },
+        ),
+        if (isReturn && selectedReturnSchedule != null)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _startSeatSelection,
+              child: Text('좌석 선택하기'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+                minimumSize: Size(double.infinity, 50),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildScheduleItem(TrainSchedule schedule, bool isReturn) {
+    Duration duration = schedule.arrivalTime.difference(schedule.departureTime);
+    String durationStr = '${duration.inHours}시간 ${duration.inMinutes % 60}분';
+    bool isSelected = isReturn
+        ? selectedReturnSchedule?.trainNumber == schedule.trainNumber
+        : selectedDepartureSchedule?.trainNumber == schedule.trainNumber;
+
+    return ListTile(
+      title: Text(
+        schedule.trainNumber,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Colors.purple : Colors.black,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 3),
+          Text('출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, '
+              '도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} '
+              '소요시간: $durationStr'),
+        ],
+      ),
+      onTap: () => _selectSchedule(schedule, isReturn),
+      tileColor: isSelected ? Colors.purple.withOpacity(0.1) : null,
     );
   }
 }

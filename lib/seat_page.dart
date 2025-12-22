@@ -52,32 +52,89 @@ class _SeatPageState extends State<SeatPage>
   Set<String> selectedSeats = {};
   Set<String> selectedReturnSeats = {};
   late DateTime selectedDate;
-  late List<TrainSchedule> schedules;
-  int currentScheduleIndex = 0;
   bool isSelectingReturn = false;
+  late TrainSchedule currentSchedule;
 
   @override
   void initState() {
     super.initState();
     selectedDate = widget.selectedDate;
-    // 출발편/도착편에 따라 적절한 스케줄 설정
-    schedules = [widget.selectedSchedule];
-    currentScheduleIndex = 0;
-    isSelectingReturn = widget.returnSchedule != null &&
-        widget.selectedSchedule.trainNumber ==
-            widget.returnSchedule!.trainNumber;
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _offsetAnimation = Tween(
-      begin: const Offset(0, 1),
+
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
     ));
+
+    // 현재 선택된 스케줄이 출발편인지 도착편인지 확인
+    isSelectingReturn = widget.returnSchedule != null &&
+        widget.selectedSchedule.trainNumber ==
+            widget.returnSchedule!.trainNumber;
+    currentSchedule = widget.selectedSchedule;
+  }
+
+  // 스케줄 변경 메소드 수정
+  void _changeTrainSchedule(int direction) {
+    setState(() {
+      List<TrainSchedule> availableSchedules =
+          TrainScheduleService.getSchedules(
+        widget.departure,
+        widget.arrival,
+        selectedDate,
+      );
+
+      // 현재 선택된 스케줄의 인덱스 찾기
+      int currentIndex = availableSchedules.indexWhere(
+          (schedule) => schedule.trainNumber == currentSchedule.trainNumber);
+
+      int newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < availableSchedules.length) {
+        currentSchedule = availableSchedules[newIndex];
+      } else {
+        _showNoTrainAlert(
+          direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.',
+        );
+      }
+    });
+  }
+
+  // 열차 정보 위젯 수정
+  Widget _buildTrainInfo() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            children: [
+              Text(
+                currentSchedule.trainNumber,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '${DateFormat('HH:mm').format(currentSchedule.departureTime)} - '
+                '${DateFormat('HH:mm').format(currentSchedule.arrivalTime)}',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -456,14 +513,11 @@ class _SeatPageState extends State<SeatPage>
                                 childCount: widget.childCount,
                                 seniorCount: widget.seniorCount,
                                 departureSchedule: TrainSchedule(
-                                  trainNumber: schedules[currentScheduleIndex]
-                                      .trainNumber,
+                                  trainNumber: currentSchedule.trainNumber,
                                   departureStation: widget.departureStation,
                                   arrivalStation: widget.arrivalStation,
-                                  departureTime: schedules[currentScheduleIndex]
-                                      .departureTime,
-                                  arrivalTime: schedules[currentScheduleIndex]
-                                      .arrivalTime,
+                                  departureTime: currentSchedule.departureTime,
+                                  arrivalTime: currentSchedule.arrivalTime,
                                 ),
                                 returnSchedule: widget.returnSchedule,
                                 // 추가된 부분
