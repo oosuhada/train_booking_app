@@ -15,11 +15,11 @@ class SeatPage extends StatefulWidget {
   final bool isRoundTrip;
 
   // 날짜 관련
-  final DateTime selectedDepartureDate;
+  final DateTime? selectedDepartureDate;
   final DateTime? selectedReturnDate;
 
   // 출발편 정보
-  final TrainSchedule departureSchedule;
+  final TrainSchedule? departureSchedule;
   final DateTime departureTime;
   final DateTime departureArrivalTime;
 
@@ -29,7 +29,7 @@ class SeatPage extends StatefulWidget {
   final DateTime? returnArrivalTime;
 
   const SeatPage({
-    super.key,
+    Key? key,
     required this.departure,
     required this.arrival,
     required this.departureStation,
@@ -44,9 +44,9 @@ class SeatPage extends StatefulWidget {
     required this.departureTime,
     required this.departureArrivalTime,
     this.returnSchedule,
-    this.returnDepartureTime,
-    this.returnArrivalTime,
-  });
+    required this.returnDepartureTime,
+    required this.returnArrivalTime,
+  }) : super(key: key);
 
   @override
   _SeatPageState createState() => _SeatPageState();
@@ -58,7 +58,7 @@ class _SeatPageState extends State<SeatPage>
   late Animation<Offset> _offsetAnimation;
 
   // 출발편과 도착편 스케줄 분리
-  late TrainSchedule departureSchedule;
+  late TrainSchedule? departureSchedule;
   TrainSchedule? returnSchedule;
 
   List<List<bool>> seats = List.generate(20, (_) => List.filled(4, false));
@@ -68,30 +68,29 @@ class _SeatPageState extends State<SeatPage>
   bool isSelectingReturn = false;
   late DateTime selectedDepartureDate;
   DateTime? selectedReturnDate;
-
+  late Map<String, List<TrainSchedule>> allSchedules;
   late List<TrainSchedule> departureSchedules;
   List<TrainSchedule>? returnSchedules;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-
-    selectedDepartureDate = widget.selectedDepartureDate;
-    selectedReturnDate = widget.selectedReturnDate;
+    _tabController = TabController(length: 2, vsync: this);
 
     departureSchedule = widget.departureSchedule;
     returnSchedule = widget.returnSchedule;
+    selectedDepartureDate = widget.selectedDepartureDate!;
+    selectedReturnDate = widget.selectedReturnDate;
 
-    // 출발편 스케줄 초기화
-    departureSchedules = TrainScheduleService.getSchedules(
-        widget.departure, widget.arrival, selectedDepartureDate);
-
-    // 도착편 스케줄 초기화 (왕복인 경우)
-    if (widget.isRoundTrip &&
-        returnSchedule != null &&
-        selectedReturnDate != null) {
-      returnSchedules = TrainScheduleService.getSchedules(
-          widget.arrival, widget.departure, selectedReturnDate!);
+    // 스케줄 초기화
+    Map<String, List<TrainSchedule>> allSchedules =
+        TrainScheduleService.getSchedules(widget.departure, widget.arrival,
+            selectedDepartureDate, null // returnDate는 null로 설정 (편도 여정이므로)
+            );
+    departureSchedules = allSchedules['departure'] ?? [];
+    if (widget.isRoundTrip && selectedReturnDate != null) {
+      returnSchedules = allSchedules['return']!;
     }
 
     // 애니메이션 컨트롤러 초기화
@@ -100,7 +99,6 @@ class _SeatPageState extends State<SeatPage>
       vsync: this,
     );
 
-    //_offsetAnimation을 Animation<Offset> 타입으로 명시적으로 선언
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
       end: Offset.zero,
@@ -150,9 +148,8 @@ class _SeatPageState extends State<SeatPage>
       } else {
         // 출발편 스케줄 변경
         int currentIndex = departureSchedules.indexWhere((schedule) =>
-            schedule.trainNumber == departureSchedule.trainNumber);
+            schedule.trainNumber == departureSchedule!.trainNumber);
         int newIndex = currentIndex + direction;
-
         if (newIndex >= 0 && newIndex < departureSchedules.length) {
           departureSchedule = departureSchedules[newIndex];
         } else {
@@ -183,8 +180,8 @@ class _SeatPageState extends State<SeatPage>
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${DateFormat('HH:mm').format(currentSchedule?.departureTime ?? DateTime.now())} - '
-                  '${DateFormat('HH:mm').format(currentSchedule?.arrivalTime ?? DateTime.now())}',
+                  '${DateFormat('HH:mm').format(widget.departureTime)} - '
+                  '${DateFormat('HH:mm').format(widget.departureArrivalTime)}',
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,13 +225,20 @@ class _SeatPageState extends State<SeatPage>
                             setState(() {
                               selectedDepartureDate = selectedDepartureDate
                                   .subtract(Duration(days: 1));
+                              allSchedules = TrainScheduleService.getSchedules(
+                                  widget.departure,
+                                  widget.arrival,
+                                  selectedDepartureDate,
+                                  null // returnDate는 null로 설정 (편도 여정이므로)
+                                  );
                               departureSchedules =
-                                  TrainScheduleService.getSchedules(
-                                widget.departure,
-                                widget.arrival,
-                                selectedDepartureDate,
-                              );
-                              departureSchedule = departureSchedules.first;
+                                  allSchedules['departure'] ?? [];
+                              if (departureSchedules.isNotEmpty) {
+                                departureSchedule = departureSchedules.first;
+                              } else {
+                                // 스케줄이 없는 경우 처리
+                                departureSchedule = null;
+                              }
                             });
                           },
                         ),
@@ -259,15 +263,22 @@ class _SeatPageState extends State<SeatPage>
                           icon: Icon(Icons.arrow_forward_ios, size: 12),
                           onPressed: () {
                             setState(() {
-                              selectedDepartureDate =
-                                  selectedDepartureDate.add(Duration(days: 1));
+                              selectedDepartureDate = selectedDepartureDate
+                                  .subtract(Duration(days: 1));
+                              allSchedules = TrainScheduleService.getSchedules(
+                                  widget.departure,
+                                  widget.arrival,
+                                  selectedDepartureDate,
+                                  null // returnDate는 null로 설정 (편도 여정이므로)
+                                  );
                               departureSchedules =
-                                  TrainScheduleService.getSchedules(
-                                widget.departure,
-                                widget.arrival,
-                                selectedDepartureDate,
-                              );
-                              departureSchedule = departureSchedules.first;
+                                  allSchedules['departure'] ?? [];
+                              if (departureSchedules.isNotEmpty) {
+                                departureSchedule = departureSchedules.first;
+                              } else {
+                                // 스케줄이 없는 경우 처리
+                                departureSchedule = null;
+                              }
                             });
                           },
                         ),
@@ -446,17 +457,22 @@ class _SeatPageState extends State<SeatPage>
                     ? () {
                         if (widget.isRoundTrip && !isSelectingReturn) {
                           setState(() {
-                            isSelectingReturn = true;
-                            seats =
-                                List.generate(20, (_) => List.filled(4, false));
-                            selectedReturnDate =
-                                selectedDepartureDate.add(Duration(days: 1));
-                            returnSchedules = TrainScheduleService.getSchedules(
-                              widget.arrivalStation,
-                              widget.departureStation,
-                              selectedReturnDate!,
-                            );
-                            returnSchedule = returnSchedules!.first;
+                            selectedDepartureDate = selectedDepartureDate
+                                .subtract(Duration(days: 1));
+                            allSchedules = TrainScheduleService.getSchedules(
+                                widget.departure,
+                                widget.arrival,
+                                selectedDepartureDate,
+                                null // returnDate는 null로 설정 (편도 여정이므로)
+                                );
+                            departureSchedules =
+                                allSchedules['departure'] ?? [];
+                            if (departureSchedules.isNotEmpty) {
+                              departureSchedule = departureSchedules.first;
+                            } else {
+                              // 스케줄이 없는 경우 처리
+                              departureSchedule = null;
+                            }
                           });
                         } else {
                           Navigator.push(
@@ -475,14 +491,19 @@ class _SeatPageState extends State<SeatPage>
                                 adultCount: widget.adultCount,
                                 childCount: widget.childCount,
                                 seniorCount: widget.seniorCount,
-                                departureSchedule: TrainSchedule(
-                                  trainNumber: departureSchedule.trainNumber,
-                                  departureStation: widget.departureStation,
-                                  arrivalStation: widget.arrivalStation,
-                                  departureTime:
-                                      departureSchedule.departureTime,
-                                  arrivalTime: departureSchedule.arrivalTime,
-                                ),
+                                departureSchedule: departureSchedule != null
+                                    ? TrainSchedule(
+                                        trainNumber:
+                                            departureSchedule!.trainNumber,
+                                        departureStation:
+                                            widget.departureStation,
+                                        arrivalStation: widget.arrivalStation,
+                                        departureTime:
+                                            departureSchedule!.departureTime,
+                                        arrivalTime:
+                                            departureSchedule!.arrivalTime,
+                                      )
+                                    : null,
                                 returnSchedule: returnSchedule,
                                 selectedDepartureDate: selectedDepartureDate,
                                 selectedReturnDate: isSelectingReturn

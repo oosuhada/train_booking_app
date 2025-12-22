@@ -14,7 +14,7 @@ class PaymentPage extends StatefulWidget {
   final int adultCount;
   final int childCount;
   final int seniorCount;
-  final TrainSchedule departureSchedule;
+  final TrainSchedule? departureSchedule;
   final TrainSchedule? returnSchedule;
   final DateTime selectedDepartureDate;
   final DateTime? selectedReturnDate;
@@ -85,7 +85,7 @@ class _PaymentPageState extends State<PaymentPage> {
               _buildSectionWithDivider('일정 정보', [
                 '출발역: ${widget.departure}',
                 '도착역: ${widget.arrival}',
-                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.selectedDepartureDate)})',
+                '출발편: ${widget.departureSchedule?.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.selectedDepartureDate)})',
                 if (widget.isRoundTrip && widget.returnSchedule != null)
                   '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.selectedReturnDate!)})',
               ]),
@@ -98,7 +98,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ]),
               SizedBox(height: 10),
               _buildSectionWithDivider('일정 정보', [
-                '출발편: ${widget.departureSchedule.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule.departureTime)} - ${DateFormat('HH:mm').format(widget.departureSchedule.arrivalTime)})',
+                '출발편: ${widget.departureSchedule?.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.departureSchedule!.departureTime)} - ${DateFormat('HH:mm').format(widget.departureSchedule!.arrivalTime)})',
                 if (widget.isRoundTrip && widget.returnSchedule != null)
                   '도착편: ${widget.returnSchedule!.trainNumber} (${DateFormat('yyyy년 MM월 dd일 HH:mm').format(widget.returnSchedule!.departureTime)} - ${DateFormat('HH:mm').format(widget.returnSchedule!.arrivalTime)})',
               ]),

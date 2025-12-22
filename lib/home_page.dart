@@ -202,7 +202,15 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _buildDateButton('가는 날', departureDate, (picked) {
-                  setState(() => departureDate = picked);
+                  setState(() {
+                    departureDate = picked;
+                    // 가는 날이 오는 날보다 늦으면 오는 날을 null로 설정
+                    if (isRoundTrip &&
+                        returnDate != null &&
+                        picked!.isAfter(returnDate!)) {
+                      returnDate = null;
+                    }
+                  });
                 }),
               ),
             ),
@@ -215,11 +223,21 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: _buildDateButton('오는 날', returnDate, (picked) {
-                    setState(() => returnDate = picked);
+                    setState(() {
+                      if (departureDate != null &&
+                          !picked!.isBefore(departureDate!)) {
+                        returnDate = picked;
+                      } else {
+                        // 오는 날이 가는 날보다 빠르면 경고 메시지 표시
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('오는 날은 가는 날 이후여야 합니다.')),
+                        );
+                      }
+                    });
                   }),
                 ),
               ),
-            ]
+            ],
           ],
         ),
       ],
@@ -380,8 +398,9 @@ class _HomePageState extends State<HomePage> {
               onChanged: (value) {
                 setState(() {
                   isRoundTrip = value;
-                  if (!isRoundTrip) {
-                    returnDate = null;
+                  if (isRoundTrip) {
+                    returnDate = departureDate
+                        ?.add(Duration(days: 1)); // 기본값으로 출발일 다음날 설정
                   }
                 });
               },
@@ -394,14 +413,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBookButton() {
+    bool canBook = departureStation != null &&
+        arrivalStation != null &&
+        departureDate != null &&
+        (!isRoundTrip || (isRoundTrip && returnDate != null));
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: (departureStation != null &&
-                arrivalStation != null &&
-                departureDate != null &&
-                (!isRoundTrip || (isRoundTrip && returnDate != null)))
+        onPressed: canBook
             ? () {
+                if (isRoundTrip && returnDate == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('왕복 여정의 경우 오는 날을 선택해주세요.')),
+                  );
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -409,7 +436,7 @@ class _HomePageState extends State<HomePage> {
                       departureStation: departureStation!,
                       arrivalStation: arrivalStation!,
                       departureDate: departureDate!,
-                      returnDate: isRoundTrip ? returnDate : null,
+                      returnDate: returnDate!,
                       adultCount: adultCount,
                       childCount: childCount,
                       seniorCount: seniorCount,
@@ -455,4 +482,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-//....
