@@ -5,8 +5,6 @@ import 'train_schedule.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -437,7 +435,7 @@ class _HomePageState extends State<HomePage> {
                       departureStation: departureStation!,
                       arrivalStation: arrivalStation!,
                       departureDate: departureDate!,
-                      returnDate: returnDate!,
+                      returnDate: isRoundTrip ? returnDate : null,
                       adultCount: adultCount,
                       childCount: childCount,
                       seniorCount: seniorCount,

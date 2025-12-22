@@ -6,7 +6,7 @@ class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
   final String arrivalStation;
   final DateTime departureDate;
-  final DateTime returnDate;
+  final DateTime? returnDate;
   final int adultCount;
   final int childCount;
   final int seniorCount;
@@ -17,7 +17,7 @@ class TrainSchedulePage extends StatefulWidget {
     required this.departureStation,
     required this.arrivalStation,
     required this.departureDate,
-    required this.returnDate,
+    this.returnDate,
     required this.adultCount,
     required this.childCount,
     required this.seniorCount,
@@ -130,8 +130,15 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildScheduleList(departureSchedules, false),
-          if (widget.isRoundTrip) _buildScheduleList(returnSchedules, true),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+            child: _buildScheduleList(departureSchedules, false),
+          ),
+          if (widget.isRoundTrip)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+              child: _buildScheduleList(returnSchedules, true),
+            ),
         ],
       ),
     );

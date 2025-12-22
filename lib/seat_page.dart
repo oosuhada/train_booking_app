@@ -160,8 +160,12 @@ class _SeatPageState extends State<SeatPage>
   // Part 2 - build 메서드
   @override
   Widget build(BuildContext context) {
-    final currentSchedule =
-        isSelectingReturn ? returnSchedule : departureSchedule;
+    final TrainSchedule? currentSchedule;
+    if (isSelectingReturn) {
+      currentSchedule = returnSchedule;
+    } else {
+      currentSchedule = departureSchedule;
+    }
     final schedules = isSelectingReturn ? returnSchedules : departureSchedules;
 
     return Scaffold(
@@ -171,237 +175,250 @@ class _SeatPageState extends State<SeatPage>
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(
-                  '${currentSchedule?.trainNumber}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${DateFormat('HH:mm').format(widget.departureTime)} - '
-                  '${DateFormat('HH:mm').format(widget.departureArrivalTime)}',
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      onPressed: () => _changeTrainSchedule(-1),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: (schedules != null && currentSchedule != null)
-                          ? (schedules.indexOf(currentSchedule) <
-                                  schedules.length - 1
-                              ? () => _changeTrainSchedule(1)
-                              : null)
-                          : null,
-                      color: schedules != null &&
-                              schedules.indexOf(currentSchedule!) <
-                                  schedules.length - 1
-                          ? null
-                          : Colors.grey[300],
-                    ),
-                  ],
-                ),
-                // 날짜 선택 위젯
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back_ios, size: 12),
-                          onPressed: () {
-                            DateTime today = DateTime.now();
-                            if (selectedDepartureDate
-                                .isBefore(today.add(Duration(days: 1)))) {
-                              _showNoTrainAlert('더 이전 날짜는 선택할 수 없습니다.');
-                              return;
-                            }
-                            setState(() {
-                              selectedDepartureDate = selectedDepartureDate
-                                  .subtract(Duration(days: 1));
-                              allSchedules = TrainScheduleService.getSchedules(
-                                  widget.departure,
-                                  widget.arrival,
-                                  selectedDepartureDate,
-                                  null // returnDate는 null로 설정 (편도 여정이므로)
-                                  );
-                              departureSchedules =
-                                  allSchedules['departure'] ?? [];
-                              if (departureSchedules.isNotEmpty) {
-                                departureSchedule = departureSchedules.first;
-                              } else {
-                                // 스케줄이 없는 경우 처리
-                                departureSchedule = null;
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          '이전날',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          DateFormat('yy년 MM월 dd일')
-                              .format(selectedDepartureDate),
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_forward_ios, size: 12),
-                          onPressed: () {
-                            setState(() {
-                              selectedDepartureDate = selectedDepartureDate
-                                  .subtract(Duration(days: 1));
-                              allSchedules = TrainScheduleService.getSchedules(
-                                  widget.departure,
-                                  widget.arrival,
-                                  selectedDepartureDate,
-                                  null // returnDate는 null로 설정 (편도 여정이므로)
-                                  );
-                              departureSchedules =
-                                  allSchedules['departure'] ?? [];
-                              if (departureSchedules.isNotEmpty) {
-                                departureSchedule = departureSchedules.first;
-                              } else {
-                                // 스케줄이 없는 경우 처리
-                                departureSchedule = null;
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          '다음날',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                // 좌석 범례
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('선택됨'),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Colors.purple,
-                        borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_ios),
+                        onPressed: () => _changeTrainSchedule(-1),
                       ),
-                    ),
-                    SizedBox(width: 20),
-                    Text('선택 안됨'),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(8),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              '${currentSchedule?.trainNumber}',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${DateFormat('HH:mm').format(widget.departureTime)} - '
+                              '${DateFormat('HH:mm').format(widget.departureArrivalTime)}',
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                // 좌석 레이블
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: ['A', 'B', '', 'C', 'D']
-                      .map((label) =>
-                          Text(label, style: TextStyle(fontSize: 18)))
-                      .toList(),
-                ),
-                // 좌석 그리드
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: seats[0].length + 1,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 4,
-                    mainAxisSpacing: 4,
+                      IconButton(
+                        icon: Icon(Icons.arrow_forward_ios),
+                        onPressed:
+                            (schedules != null && currentSchedule != null)
+                                ? (schedules.indexOf(currentSchedule) <
+                                        schedules.length - 1
+                                    ? () => _changeTrainSchedule(1)
+                                    : null)
+                                : null,
+                        color: schedules != null &&
+                                schedules.indexOf(currentSchedule!) <
+                                    schedules.length - 1
+                            ? null
+                            : Colors.grey[300],
+                      ),
+                    ],
                   ),
-                  itemCount: seats.length * (seats[0].length + 1),
-                  itemBuilder: (context, index) {
-                    if (index % (seats[0].length + 1) == 2) {
-                      int row = index ~/ (seats[0].length + 1) + 1;
-                      return Center(
-                        child: Text(row.toString(),
-                            style: TextStyle(fontSize: 18)),
-                      );
-                    }
-
-                    int row = index ~/ (seats[0].length + 1);
-                    int col = index % (seats[0].length + 1) > 2
-                        ? index % (seats[0].length + 1) - 1
-                        : index % (seats[0].length + 1);
-
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (seats[row][col]) {
-                            seats[row][col] = false;
-                            String seatNumber =
-                                '${row + 1}${String.fromCharCode(65 + col)}';
-                            if (isSelectingReturn) {
-                              selectedReturnSeats.remove(seatNumber);
-                            } else {
-                              selectedSeats.remove(seatNumber);
-                            }
-                            if ((isSelectingReturn
-                                    ? selectedReturnSeats
-                                    : selectedSeats)
-                                .isEmpty) {
-                              _controller.reverse();
-                            }
-                          } else if ((isSelectingReturn
-                                      ? selectedReturnSeats
-                                      : selectedSeats)
-                                  .length <
-                              widget.adultCount +
-                                  widget.childCount +
-                                  widget.seniorCount) {
-                            seats[row][col] = true;
-                            String seatNumber =
-                                '${row + 1}${String.fromCharCode(65 + col)}';
-                            if (isSelectingReturn) {
-                              selectedReturnSeats.add(seatNumber);
-                            } else {
-                              selectedSeats.add(seatNumber);
-                            }
-                            if (!_controller.isCompleted) {
-                              _controller.forward();
-                            }
-                          }
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.all(4),
+                  // 날짜 선택 위젯
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_back_ios, size: 12),
+                            onPressed: () {
+                              DateTime today = DateTime.now();
+                              if (selectedDepartureDate
+                                  .isBefore(today.add(Duration(days: 1)))) {
+                                _showNoTrainAlert('더 이전 날짜는 선택할 수 없습니다.');
+                                return;
+                              }
+                              setState(() {
+                                selectedDepartureDate = selectedDepartureDate
+                                    .subtract(Duration(days: 1));
+                                allSchedules =
+                                    TrainScheduleService.getSchedules(
+                                        widget.departure,
+                                        widget.arrival,
+                                        selectedDepartureDate,
+                                        null // returnDate는 null로 설정 (편도 여정이므로)
+                                        );
+                                departureSchedules =
+                                    allSchedules['departure'] ?? [];
+                                if (departureSchedules.isNotEmpty) {
+                                  departureSchedule = departureSchedules.first;
+                                } else {
+                                  // 스케줄이 없는 경우 처리
+                                  departureSchedule = null;
+                                }
+                              });
+                            },
+                          ),
+                          Text(
+                            '이전날',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            DateFormat('yy년 MM월 dd일')
+                                .format(selectedDepartureDate),
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_forward_ios, size: 12),
+                            onPressed: () {
+                              setState(() {
+                                selectedDepartureDate = selectedDepartureDate
+                                    .subtract(Duration(days: 1));
+                                allSchedules =
+                                    TrainScheduleService.getSchedules(
+                                        widget.departure,
+                                        widget.arrival,
+                                        selectedDepartureDate,
+                                        null // returnDate는 null로 설정 (편도 여정이므로)
+                                        );
+                                departureSchedules =
+                                    allSchedules['departure'] ?? [];
+                                if (departureSchedules.isNotEmpty) {
+                                  departureSchedule = departureSchedules.first;
+                                } else {
+                                  // 스케줄이 없는 경우 처리
+                                  departureSchedule = null;
+                                }
+                              });
+                            },
+                          ),
+                          Text(
+                            '다음날',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  // 좌석 범례
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('선택됨'),
+                      SizedBox(width: 20),
+                      Container(
+                        width: 24,
+                        height: 24,
                         decoration: BoxDecoration(
-                          color: seats[row][col]
-                              ? Colors.purple
-                              : Colors.grey[300],
+                          color: Colors.purple,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ],
+                      SizedBox(width: 20),
+                      Text('선택 안됨'),
+                      SizedBox(width: 20),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  // 좌석 레이블
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: ['A', 'B', '', 'C', 'D']
+                        .map((label) =>
+                            Text(label, style: TextStyle(fontSize: 18)))
+                        .toList(),
+                  ),
+                  // 좌석 그리드
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: seats[0].length + 1,
+                      childAspectRatio: 1,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
+                    ),
+                    itemCount: seats.length * (seats[0].length + 1),
+                    itemBuilder: (context, index) {
+                      if (index % (seats[0].length + 1) == 2) {
+                        int row = index ~/ (seats[0].length + 1) + 1;
+                        return Center(
+                          child: Text(row.toString(),
+                              style: TextStyle(fontSize: 18)),
+                        );
+                      }
+
+                      int row = index ~/ (seats[0].length + 1);
+                      int col = index % (seats[0].length + 1) > 2
+                          ? index % (seats[0].length + 1) - 1
+                          : index % (seats[0].length + 1);
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (seats[row][col]) {
+                              seats[row][col] = false;
+                              String seatNumber =
+                                  '${row + 1}${String.fromCharCode(65 + col)}';
+                              if (isSelectingReturn) {
+                                selectedReturnSeats.remove(seatNumber);
+                              } else {
+                                selectedSeats.remove(seatNumber);
+                              }
+                              if ((isSelectingReturn
+                                      ? selectedReturnSeats
+                                      : selectedSeats)
+                                  .isEmpty) {
+                                _controller.reverse();
+                              }
+                            } else if ((isSelectingReturn
+                                        ? selectedReturnSeats
+                                        : selectedSeats)
+                                    .length <
+                                widget.adultCount +
+                                    widget.childCount +
+                                    widget.seniorCount) {
+                              seats[row][col] = true;
+                              String seatNumber =
+                                  '${row + 1}${String.fromCharCode(65 + col)}';
+                              if (isSelectingReturn) {
+                                selectedReturnSeats.add(seatNumber);
+                              } else {
+                                selectedSeats.add(seatNumber);
+                              }
+                              if (!_controller.isCompleted) {
+                                _controller.forward();
+                              }
+                            }
+                          });
+                        },
+                        child: Container(
+                          margin: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: seats[row][col]
+                                ? Colors.purple
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           _buildBottomPanel(),
