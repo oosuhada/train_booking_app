@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'home_page.dart';
 import 'app_localizations.dart';
 
@@ -33,11 +34,16 @@ class _MyAppState extends State<MyApp> {
 
       localizationsDelegates: [
         AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-      // 지원하는 언어 목록 추가
+      // 지원하는 언어 목록 추후 계속 추가해야 작동
       supportedLocales: const [
         Locale('ko'),
         Locale('en'),
+        Locale('ja'),
+        Locale('zh'),
       ],
       theme: ThemeData(
         primarySwatch: Colors.purple,
