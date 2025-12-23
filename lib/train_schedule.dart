@@ -160,12 +160,14 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: _startSeatSelection,
-              child: Text('좌석 선택하기'),
+              child: Text('좌석 선택하기',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
-              ),
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20))),
             ),
           ),
       ],
