@@ -62,16 +62,25 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   void _selectSchedule(TrainSchedule schedule, bool isReturn) {
     setState(() {
       if (isReturn) {
-        selectedReturnSchedule = schedule;
-        // 도착편 선택 후 버튼으로 좌석 선택 진행
-      } else {
-        selectedDepartureSchedule = schedule;
-        if (!widget.isRoundTrip) {
-          _startSeatSelection();
+        // 같은 스케줄을 다시 클릭한 경우 선택 해제
+        if (selectedReturnSchedule?.trainNumber == schedule.trainNumber) {
+          selectedReturnSchedule = null;
         } else {
-          // 왕복인 경우 도착편 탭으로 전환
-          isShowingReturn = true;
-          _tabController.animateTo(1);
+          selectedReturnSchedule = schedule;
+        }
+      } else {
+        // 같은 스케줄을 다시 클릭한 경우 선택 해제
+        if (selectedDepartureSchedule?.trainNumber == schedule.trainNumber) {
+          selectedDepartureSchedule = null;
+        } else {
+          selectedDepartureSchedule = schedule;
+          if (!widget.isRoundTrip) {
+            _startSeatSelection();
+          } else {
+            // 왕복인 경우 도착편 탭으로 전환
+            isShowingReturn = true;
+            _tabController.animateTo(1);
+          }
         }
       }
     });
