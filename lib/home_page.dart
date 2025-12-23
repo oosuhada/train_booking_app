@@ -260,17 +260,20 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
+          color: date != null ? Colors.white : null, // 날짜 선택 시 흰색 배경
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           date == null ? label : DateFormat(' yyyy-MM-dd').format(date),
           style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black87 // 다크 모드일 때 그레이 명시
-                  : Colors.grey // 라이트 모드일 때도 그레이로 명시
-              ),
+            fontSize: 16,
+            color: date == null
+                ? Colors.grey // 날짜 미선택 시 회색
+                : Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black87 // 다크 모드에서 날짜 선택 시 진한 검정
+                    : Colors.black87, // 라이트 모드에서 날짜 선택 시 진한 검정
+          ),
         ),
       ),
     );
