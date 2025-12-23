@@ -264,8 +264,13 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          date == null ? label : DateFormat('yyyy-MM-dd').format(date),
-          style: TextStyle(fontSize: 16),
+          date == null ? label : DateFormat(' yyyy-MM-dd').format(date),
+          style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey // 다크 모드일 때 그레이 명시
+                  : Colors.grey // 라이트 모드일 때도 그레이로 명시
+              ),
         ),
       ),
     );

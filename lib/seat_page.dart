@@ -438,7 +438,9 @@ class _SeatPageState extends State<SeatPage>
         child: Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[800] // 다크 모드일때 어둡게
+                : Colors.white, // 라이트 모드일때
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.5),

@@ -184,7 +184,11 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
         schedule.trainNumber,
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Colors.purple : Colors.black,
+          color: isSelected
+              ? Colors.purple //선택되었을때 보라색 UI
+              : Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white // 다크 모드일때 흰색 UI
+                  : Colors.black, // 라이트 모드일때 검은색 UI
         ),
       ),
       subtitle: Column(
