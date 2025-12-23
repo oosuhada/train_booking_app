@@ -1,11 +1,70 @@
 import 'package:flutter/material.dart';
 
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    return ['en', 'ko'].contains(locale.languageCode);
+  }
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async {
+    return AppLocalizations(locale);
+  }
+
+  @override
+  bool shouldReload(AppLocalizationsDelegate old) => false;
+}
+
 class AppLocalizations {
   final Locale locale;
+  static AppLocalizations? _current;
 
-  AppLocalizations(this.locale);
+  AppLocalizations(this.locale) {
+    _current = this;
+  }
 
-  static Map<String, Map<String, String>> _localizedValues = {
+  // 안전한 싱글톤 접근자
+  static AppLocalizations get current {
+    if (_current == null) {
+      _current = AppLocalizations(const Locale('ko')); // 기본값으로 한국어 설정
+    }
+    return _current!;
+  }
+
+  // context를 사용한 안전한 접근자
+  static AppLocalizations of(BuildContext context) {
+    try {
+      final localizations =
+          Localizations.of<AppLocalizations>(context, AppLocalizations);
+      if (localizations != null) {
+        return localizations;
+      }
+      // Localizations가 아직 초기화되지 않은 경우
+      debugPrint(
+          'Warning: Localizations not initialized, using default locale (ko)');
+      return current;
+    } catch (e) {
+      debugPrint('Error accessing localizations: $e');
+      return current;
+    }
+  }
+
+  // 안전한 번역 메서드
+  String translate(String key, {String? fallback}) {
+    try {
+      final languageCode = locale.languageCode;
+      final translations =
+          _localizedValues[languageCode] ?? _localizedValues['ko']!;
+      return translations[key] ?? fallback ?? key;
+    } catch (e) {
+      debugPrint('Translation error for key "$key": $e');
+      return fallback ?? key;
+    }
+  }
+
+  static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'title': 'K Rail',
       'book_ticket': 'Book Ticket',
