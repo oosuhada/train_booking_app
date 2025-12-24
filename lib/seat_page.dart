@@ -4,7 +4,7 @@ import 'payment_page.dart';
 import 'train_schedule.dart';
 import 'app_localizations.dart';
 
-// Part 1 - 클래스 선언부터 build 메서드 시작
+// Part 1 - 클래스 선언
 class SeatPage extends StatefulWidget {
   final String departure;
   final String arrival;
@@ -61,6 +61,7 @@ class SeatPage extends StatefulWidget {
 
 class _SeatPageState extends State<SeatPage>
     with SingleTickerProviderStateMixin {
+  // Part2. 변수 선언
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
@@ -78,7 +79,12 @@ class _SeatPageState extends State<SeatPage>
   late Map<String, List<TrainSchedule>> allSchedules;
   late List<TrainSchedule> departureSchedules;
   List<TrainSchedule>? returnSchedules;
+  // 승객 유형별 선택된 좌석수를 추적하는 맵
+  late Map<String, List<String>> selectedSeatsByType;
+  // 승객 유형별 좌석 지정 순서
+  List<String> passengerOrder = ['어른', '어린이', '경로'];
 
+  // Part 3. initState 메서드
   @override
   void initState() {
     super.initState();
@@ -98,6 +104,24 @@ class _SeatPageState extends State<SeatPage>
       returnSchedules = allSchedules['return']!;
     }
 
+    // allSchedules 초기화
+    allSchedules = TrainScheduleService.getSchedules(widget.departure,
+        widget.arrival, selectedDepartureDate, selectedReturnDate);
+
+    departureSchedules = allSchedules['departure'] ?? [];
+
+    if (widget.isRoundTrip && selectedReturnDate != null) {
+      returnSchedules = allSchedules['return'];
+      returnSchedule = returnSchedules?.first;
+    }
+
+    // selectedSeatsByType 초기화
+    selectedSeatsByType = {
+      '어른': [],
+      '어린이': [],
+      '경로': [],
+    };
+
     // 애니메이션 컨트롤러 초기화
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -113,60 +137,7 @@ class _SeatPageState extends State<SeatPage>
     ));
   }
 
-  // _showNoTrainAlert 메소드 추가
-  void _showNoTrainAlert(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context).translate('알림')),
-          content: Text(AppLocalizations.of(context).translate(message)),
-          actions: [
-            TextButton(
-              child: Text(AppLocalizations.of(context).translate('확인')),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 열차 스케줄 변경 메소드
-  void _changeTrainSchedule(int direction) {
-    setState(() {
-      if (isSelectingReturn &&
-          returnSchedules != null &&
-          returnSchedule != null) {
-        // 도착편 스케줄 변경
-        int currentIndex = returnSchedules!.indexWhere(
-            (schedule) => schedule.trainNumber == returnSchedule!.trainNumber);
-        int newIndex = currentIndex + direction;
-
-        if (newIndex >= 0 && newIndex < returnSchedules!.length) {
-          returnSchedule = returnSchedules![newIndex];
-        } else {
-          _showNoTrainAlert(direction > 0
-              ? AppLocalizations.of(context).translate('다음 열차가 없습니다.')
-              : AppLocalizations.of(context).translate('이전 열차가 없습니다.'));
-        }
-      } else {
-        // 출발편 스케줄 변경
-        int currentIndex = departureSchedules.indexWhere((schedule) =>
-            schedule.trainNumber == departureSchedule!.trainNumber);
-        int newIndex = currentIndex + direction;
-        if (newIndex >= 0 && newIndex < departureSchedules.length) {
-          departureSchedule = departureSchedules[newIndex];
-        } else {
-          _showNoTrainAlert(direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.');
-        }
-      }
-    });
-  }
-
-  // Part 2 - build 메서드
+  // Part 4 - build 메서드
   @override
   Widget build(BuildContext context) {
     final TrainSchedule? currentSchedule;
@@ -177,21 +148,41 @@ class _SeatPageState extends State<SeatPage>
     }
     final schedules = isSelectingReturn ? returnSchedules : departureSchedules;
 
-    Widget _buildScheduleInfo() {
-      TrainSchedule? currentSchedule = widget.isSelectingReturn
-          ? widget.returnSchedule!
-          : widget.departureSchedule;
-      return Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${currentSchedule?.trainNumber}'),
-            Text(
-                '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} ${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}'),
-          ],
-        ),
-      );
+    void _selectSeat(int row, int col) {
+      setState(() {
+        String seatNumber = '${row + 1}${String.fromCharCode(65 + col)}';
+        if (isSelectingReturn) {
+          if (seats[row][col]) {
+            seats[row][col] = false;
+            selectedReturnSeats.remove(seatNumber);
+            _removeSeat(seatNumber);
+          } else {
+            if (_canSelectMoreSeats()) {
+              seats[row][col] = true;
+              selectedReturnSeats.add(seatNumber);
+              _addSeat(seatNumber);
+            }
+          }
+        } else {
+          if (seats[row][col]) {
+            seats[row][col] = false;
+            selectedSeats.remove(seatNumber);
+            _removeSeat(seatNumber);
+          } else {
+            if (_canSelectMoreSeats()) {
+              seats[row][col] = true;
+              selectedSeats.add(seatNumber);
+              _addSeat(seatNumber);
+            }
+          }
+        }
+
+        if (_getTotalSelectedSeats() == 0) {
+          _controller.reverse();
+        } else if (!_controller.isCompleted) {
+          _controller.forward();
+        }
+      });
     }
 
     return Scaffold(
@@ -394,9 +385,15 @@ class _SeatPageState extends State<SeatPage>
                       }
 
                       int row = index ~/ (seats[0].length + 1);
-                      int col = index % (seats[0].length + 1) > 2
-                          ? index % (seats[0].length + 1) - 1
-                          : index % (seats[0].length + 1);
+                      int col = index % (seats[0].length + 1);
+
+                      // 통로 열인 경우 빈 컨테이너 반환
+                      if (col == 2) {
+                        return Container();
+                      }
+
+                      // 실제 열 번호 조정
+                      if (col > 2) col--;
 
                       return GestureDetector(
                         onTap: () {
@@ -459,21 +456,26 @@ class _SeatPageState extends State<SeatPage>
     );
   }
 
-  //날짜 표시 양식 번역 연동
-  String getLocalizedDateFormat(BuildContext context) {
-    switch (Localizations.localeOf(context).languageCode) {
-      case 'en':
-        return 'MMM d, yyyy';
-      case 'ja':
-        return 'yyyy年MM月dd日';
-      case 'zh':
-        return 'yyyy年MM月dd日';
-      default:
-        return 'yy년 MM월 dd일';
-    }
+// Part 5. - UI 관련 메서드들
+  // 열차 스케줄 정보를 표시하는 위젯 생성
+  Widget _buildScheduleInfo() {
+    TrainSchedule? currentSchedule = widget.isSelectingReturn
+        ? widget.returnSchedule!
+        : widget.departureSchedule;
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${currentSchedule?.trainNumber}'),
+          Text(
+              '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} ${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}'),
+        ],
+      ),
+    );
   }
 
-// Part 3 - _buildBottomPanel
+  // 하단 패널 위젯 빌드 메서드
   Widget _buildBottomPanel() {
     return Positioned(
       left: 0,
@@ -485,8 +487,8 @@ class _SeatPageState extends State<SeatPage>
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey[800] // 다크 모드일때 어둡게
-                : Colors.white, // 라이트 모드일때
+                ? Colors.grey[800]
+                : Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.5),
@@ -500,35 +502,20 @@ class _SeatPageState extends State<SeatPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '${AppLocalizations.of(context).translate('선택한 좌석')}: ${(isSelectingReturn ? selectedReturnSeats : selectedSeats).join(", ")}',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '${AppLocalizations.of(context).translate('어른')}: ${widget.adultCount}, ${AppLocalizations.of(context).translate('어린이')}: ${widget.childCount}, ${AppLocalizations.of(context).translate('경로')}: ${widget.seniorCount}',
-                style: TextStyle(fontSize: 16),
-              ),
+              ..._buildPassengerTypeInfo(),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: (isSelectingReturn
-                                ? selectedReturnSeats
-                                : selectedSeats)
-                            .length ==
-                        widget.adultCount +
-                            widget.childCount +
-                            widget.seniorCount
+                onPressed: _isAllSeatsSelected()
                     ? () {
                         if (widget.isRoundTrip && !isSelectingReturn) {
                           setState(() {
                             isSelectingReturn = true;
-                            // 도착편 스케줄 및 좌석 초기화
                             seats =
                                 List.generate(20, (_) => List.filled(4, false));
                             selectedReturnSeats.clear();
-                            // 필요한 경우 returnSchedule 초기화
+                            _getPassengerTypeCount;
                           });
                         } else {
-                          // 기존의 결제 페이지로 이동하는 코드
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -592,5 +579,194 @@ class _SeatPageState extends State<SeatPage>
         ),
       ),
     );
+  }
+
+  //좌석 선택 시 bottom panel에 실시간으로 선택 좌석 표시하는 메서드
+  List<Widget> _buildPassengerTypeInfo() {
+    List<Widget> widgets = [];
+    for (String type in ['어른', '어린이', '경로']) {
+      int count = _getPassengerTypeCount(type);
+      if (count > 0) {
+        List<String> selectedSeats = selectedSeatsByType[type] ?? [];
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              '$type: $count명 (선택된 좌석: ${selectedSeats.isNotEmpty ? selectedSeats.join(", ") : "-"})',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
+
+// Part6. 좌석 선택 관련 메서드들
+  // 좌석을 선택하거나 선택 해제하는 메서드 - 도착편 좌석 선택도 가능하게 수정
+  void _selectSeat(int row, int col) {
+    setState(() {
+      String seatNumber = '${row + 1}${String.fromCharCode(65 + col)}';
+      if (isSelectingReturn) {
+        if (seats[row][col]) {
+          seats[row][col] = false;
+          selectedReturnSeats.remove(seatNumber);
+          _removeSeat(seatNumber);
+        } else {
+          if (_canSelectMoreSeats()) {
+            seats[row][col] = true;
+            selectedReturnSeats.add(seatNumber);
+            _addSeat(seatNumber);
+          }
+        }
+      } else {
+        if (seats[row][col]) {
+          seats[row][col] = false;
+          selectedSeats.remove(seatNumber);
+          _removeSeat(seatNumber);
+        } else {
+          if (_canSelectMoreSeats()) {
+            seats[row][col] = true;
+            selectedSeats.add(seatNumber);
+            _addSeat(seatNumber);
+          }
+        }
+      }
+
+      if (_getTotalSelectedSeats() == 0) {
+        _controller.reverse();
+      } else if (!_controller.isCompleted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  // 선택된 좌석을 추가하는 메서드
+  void _addSeat(String seatNumber) {
+    for (String type in passengerOrder) {
+      if ((selectedSeatsByType[type]?.length ?? 0) <
+          _getPassengerTypeCount(type)) {
+        selectedSeatsByType[type] ??= [];
+        selectedSeatsByType[type]!.add(seatNumber);
+        break;
+      }
+    }
+  }
+
+  // 선택된 좌석을 제거하는 메서드
+  void _removeSeat(String seatNumber) {
+    for (String type in passengerOrder) {
+      if (selectedSeatsByType[type]?.contains(seatNumber) ?? false) {
+        selectedSeatsByType[type]!.remove(seatNumber);
+        break;
+      }
+    }
+  }
+
+  // 모든 좌석이 선택되었는지 확인하는 새로운 메서드 추가
+  bool _isAllSeatsSelected() {
+    int totalRequiredSeats =
+        widget.adultCount + widget.childCount + widget.seniorCount;
+    if (isSelectingReturn) {
+      return selectedReturnSeats.length == totalRequiredSeats;
+    } else {
+      return selectedSeats.length == totalRequiredSeats;
+    }
+  }
+
+  // 더 많은 좌석을 선택할 수 있는지 확인하는 메서드
+  bool _canSelectMoreSeats() {
+    return _getTotalSelectedSeats() <
+        widget.adultCount + widget.childCount + widget.seniorCount;
+  }
+
+  // 총 선택된 좌석 수를 반환하는 메서드
+  int _getTotalSelectedSeats() {
+    return selectedSeatsByType.values
+        .map((seats) => seats.length)
+        .fold(0, (a, b) => a + b);
+  }
+
+// Part7. 열차 스케줄 관련 메서드들
+  // 열차 스케줄 변경 메소드
+  void _changeTrainSchedule(int direction) {
+    setState(() {
+      if (isSelectingReturn &&
+          returnSchedules != null &&
+          returnSchedule != null) {
+        // 도착편 스케줄 변경
+        int currentIndex = returnSchedules!.indexWhere(
+            (schedule) => schedule.trainNumber == returnSchedule!.trainNumber);
+        int newIndex = currentIndex + direction;
+
+        if (newIndex >= 0 && newIndex < returnSchedules!.length) {
+          returnSchedule = returnSchedules![newIndex];
+        } else {
+          _showNoTrainAlert(direction > 0
+              ? AppLocalizations.of(context).translate('다음 열차가 없습니다.')
+              : AppLocalizations.of(context).translate('이전 열차가 없습니다.'));
+        }
+      } else {
+        // 출발편 스케줄 변경
+        int currentIndex = departureSchedules.indexWhere((schedule) =>
+            schedule.trainNumber == departureSchedule!.trainNumber);
+        int newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < departureSchedules.length) {
+          departureSchedule = departureSchedules[newIndex];
+        } else {
+          _showNoTrainAlert(direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.');
+        }
+      }
+    });
+  }
+
+  // 이전, 다음 열차가 없을 때 알림을 표시하는 메서드
+  void _showNoTrainAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).translate('알림')),
+          content: Text(AppLocalizations.of(context).translate(message)),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context).translate('확인')),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Part8. 유틸리티 메서드들
+  // 승객 유형별 총 인원 수 반환 메서드
+  int _getPassengerTypeCount(String type) {
+    switch (type) {
+      case '어른':
+        return widget.adultCount;
+      case '어린이':
+        return widget.childCount;
+      case '경로':
+        return widget.seniorCount;
+      default:
+        return 0;
+    }
+  }
+
+  //날짜 표시 양식 번역 연동
+  String getLocalizedDateFormat(BuildContext context) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'en':
+        return 'MMM d, yyyy';
+      case 'ja':
+        return 'yyyy年MM月dd日';
+      case 'zh':
+        return 'yyyy年MM月dd日';
+      default:
+        return 'yy년 MM월 dd일';
+    }
   }
 }
