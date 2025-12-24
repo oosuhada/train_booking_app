@@ -121,6 +121,7 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           departureArrivalTime: currentSchedule.arrivalTime,
           returnDepartureTime: isReturn ? currentSchedule.departureTime : null,
           returnArrivalTime: isReturn ? currentSchedule.arrivalTime : null,
+          isSelectingReturn: true,
           selectedLocale: widget.selectedLocale, // 언어 설정 전달
         ),
       ),

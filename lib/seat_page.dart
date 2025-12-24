@@ -28,6 +28,7 @@ class SeatPage extends StatefulWidget {
   final TrainSchedule? returnSchedule;
   final DateTime? returnDepartureTime;
   final DateTime? returnArrivalTime;
+  final bool isSelectingReturn;
 
   // 언어 설정 정보
   final Locale selectedLocale;
@@ -50,6 +51,7 @@ class SeatPage extends StatefulWidget {
     this.returnSchedule,
     required this.returnDepartureTime,
     required this.returnArrivalTime,
+    required this.isSelectingReturn,
     required this.selectedLocale,
   }) : super(key: key);
 
@@ -175,6 +177,23 @@ class _SeatPageState extends State<SeatPage>
     }
     final schedules = isSelectingReturn ? returnSchedules : departureSchedules;
 
+    Widget _buildScheduleInfo() {
+      TrainSchedule? currentSchedule = widget.isSelectingReturn
+          ? widget.returnSchedule!
+          : widget.departureSchedule;
+      return Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${currentSchedule?.trainNumber}'),
+            Text(
+                '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} ${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}'),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)
@@ -203,8 +222,9 @@ class _SeatPageState extends State<SeatPage>
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              '${DateFormat('HH:mm').format(widget.departureTime)} - '
-                              '${DateFormat('HH:mm').format(widget.returnDepartureTime)}',
+                              '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(currentSchedule!.departureTime)} '
+                              ' - '
+                              '${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(currentSchedule!.arrivalTime)}',
                             ),
                           ],
                         ),
