@@ -29,6 +29,9 @@ class SeatPage extends StatefulWidget {
   final DateTime? returnDepartureTime;
   final DateTime? returnArrivalTime;
 
+  // 언어 설정 정보
+  final Locale selectedLocale;
+
   const SeatPage({
     Key? key,
     required this.departure,
@@ -47,6 +50,7 @@ class SeatPage extends StatefulWidget {
     this.returnSchedule,
     required this.returnDepartureTime,
     required this.returnArrivalTime,
+    required this.selectedLocale,
   }) : super(key: key);
 
   @override
@@ -113,11 +117,11 @@ class _SeatPageState extends State<SeatPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('알림'),
-          content: Text(message),
+          title: Text(AppLocalizations.of(context).translate('알림')),
+          content: Text(AppLocalizations.of(context).translate(message)),
           actions: [
             TextButton(
-              child: Text('확인'),
+              child: Text(AppLocalizations.of(context).translate('확인')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -142,7 +146,9 @@ class _SeatPageState extends State<SeatPage>
         if (newIndex >= 0 && newIndex < returnSchedules!.length) {
           returnSchedule = returnSchedules![newIndex];
         } else {
-          _showNoTrainAlert(direction > 0 ? '다음 열차가 없습니다.' : '이전 열차가 없습니다.');
+          _showNoTrainAlert(direction > 0
+              ? AppLocalizations.of(context).translate('다음 열차가 없습니다.')
+              : AppLocalizations.of(context).translate('이전 열차가 없습니다.'));
         }
       } else {
         // 출발편 스케줄 변경
@@ -171,7 +177,8 @@ class _SeatPageState extends State<SeatPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isSelectingReturn ? '도착편 좌석 선택' : '출발편 좌석 선택'),
+        title: Text(AppLocalizations.of(context)
+            .translate(isSelectingReturn ? '도착편 좌석 선택' : '출발편 좌석 선택')),
       ),
       body: Stack(
         children: [
@@ -197,7 +204,7 @@ class _SeatPageState extends State<SeatPage>
                             ),
                             Text(
                               '${DateFormat('HH:mm').format(widget.departureTime)} - '
-                              '${DateFormat('HH:mm').format(widget.departureArrivalTime)}',
+                              '${DateFormat('HH:mm').format(widget.returnDepartureTime)}',
                             ),
                           ],
                         ),
@@ -232,7 +239,8 @@ class _SeatPageState extends State<SeatPage>
                               DateTime today = DateTime.now();
                               if (selectedDepartureDate
                                   .isBefore(today.add(Duration(days: 1)))) {
-                                _showNoTrainAlert('더 이전 날짜는 선택할 수 없습니다.');
+                                _showNoTrainAlert(AppLocalizations.of(context)
+                                    .translate('더 이전 날짜는 선택할 수 없습니다.'));
                                 return;
                               }
                               setState(() {
@@ -257,7 +265,7 @@ class _SeatPageState extends State<SeatPage>
                             },
                           ),
                           Text(
-                            '이전날',
+                            AppLocalizations.of(context).translate('이전날'),
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
@@ -265,7 +273,10 @@ class _SeatPageState extends State<SeatPage>
                       Column(
                         children: [
                           Text(
-                            DateFormat('yy년 MM월 dd일')
+                            DateFormat(
+                                    getLocalizedDateFormat(context),
+                                    Localizations.localeOf(context)
+                                        .languageCode)
                                 .format(selectedDepartureDate),
                             style: TextStyle(fontSize: 14),
                           ),
@@ -298,7 +309,7 @@ class _SeatPageState extends State<SeatPage>
                             },
                           ),
                           Text(
-                            '다음날',
+                            AppLocalizations.of(context).translate('다음날'),
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
@@ -310,7 +321,7 @@ class _SeatPageState extends State<SeatPage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('선택됨'),
+                      Text(AppLocalizations.of(context).translate('선택됨')),
                       SizedBox(width: 20),
                       Container(
                         width: 24,
@@ -321,7 +332,7 @@ class _SeatPageState extends State<SeatPage>
                         ),
                       ),
                       SizedBox(width: 20),
-                      Text('선택 안됨'),
+                      Text(AppLocalizations.of(context).translate('선택안됨')),
                       SizedBox(width: 20),
                       Container(
                         width: 24,
@@ -428,6 +439,20 @@ class _SeatPageState extends State<SeatPage>
     );
   }
 
+  //날짜 표시 양식 번역 연동
+  String getLocalizedDateFormat(BuildContext context) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'en':
+        return 'MMM d, yyyy';
+      case 'ja':
+        return 'yyyy年MM月dd日';
+      case 'zh':
+        return 'yyyy年MM月dd日';
+      default:
+        return 'yy년 MM월 dd일';
+    }
+  }
+
 // Part 3 - _buildBottomPanel
   Widget _buildBottomPanel() {
     return Positioned(
@@ -456,11 +481,11 @@ class _SeatPageState extends State<SeatPage>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '선택한 좌석: ${(isSelectingReturn ? selectedReturnSeats : selectedSeats).join(", ")}',
+                '${AppLocalizations.of(context).translate('선택한 좌석')}: ${(isSelectingReturn ? selectedReturnSeats : selectedSeats).join(", ")}',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
-                '어른: ${widget.adultCount}, 어린이: ${widget.childCount}, 경로: ${widget.seniorCount}',
+                '${AppLocalizations.of(context).translate('어른')}: ${widget.adultCount}, ${AppLocalizations.of(context).translate('어린이')}: ${widget.childCount}, ${AppLocalizations.of(context).translate('경로')}: ${widget.seniorCount}',
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 20),
@@ -518,6 +543,7 @@ class _SeatPageState extends State<SeatPage>
                                 selectedReturnDate: isSelectingReturn
                                     ? selectedReturnDate
                                     : null,
+                                selectedLocale: widget.selectedLocale,
                               ),
                             ),
                           );
@@ -525,7 +551,8 @@ class _SeatPageState extends State<SeatPage>
                       }
                     : null,
                 child: Text(
-                  isSelectingReturn ? '예매 하기' : '다음',
+                  AppLocalizations.of(context)
+                      .translate(isSelectingReturn ? '예매하기' : '다음'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,

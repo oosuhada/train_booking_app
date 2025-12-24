@@ -12,6 +12,7 @@ class TrainSchedulePage extends StatefulWidget {
   final int childCount;
   final int seniorCount;
   final bool isRoundTrip;
+  final Locale selectedLocale;
 
   const TrainSchedulePage({
     super.key,
@@ -23,6 +24,7 @@ class TrainSchedulePage extends StatefulWidget {
     required this.childCount,
     required this.seniorCount,
     required this.isRoundTrip,
+    required this.selectedLocale, // 언어 설정 받아오는 부분
   });
 
   @override
@@ -119,6 +121,7 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           departureArrivalTime: currentSchedule.arrivalTime,
           returnDepartureTime: isReturn ? currentSchedule.departureTime : null,
           returnArrivalTime: isReturn ? currentSchedule.arrivalTime : null,
+          selectedLocale: widget.selectedLocale, // 언어 설정 전달
         ),
       ),
     );
@@ -128,12 +131,13 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('열차 시간표'),
+        title: Text(AppLocalizations.of(context).translate('열차시간표')),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: '출발편'),
-            if (widget.isRoundTrip) Tab(text: '도착편'),
+            Tab(text: AppLocalizations.of(context).translate('출발편')),
+            if (widget.isRoundTrip)
+              Tab(text: AppLocalizations.of(context).translate('도착편')),
           ],
         ),
       ),
@@ -170,7 +174,7 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: _startSeatSelection,
-              child: Text('좌석 선택하기',
+              child: Text(AppLocalizations.of(context).translate('좌석 선택하기'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
@@ -186,7 +190,8 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
 
   Widget _buildScheduleItem(TrainSchedule schedule, bool isReturn) {
     Duration duration = schedule.arrivalTime.difference(schedule.departureTime);
-    String durationStr = '${duration.inHours}시간 ${duration.inMinutes % 60}분';
+    String durationStr =
+        '${duration.inHours}${AppLocalizations.of(context).translate('시간')} ${duration.inMinutes % 60}${AppLocalizations.of(context).translate('분')}';
     bool isSelected = isReturn
         ? selectedReturnSchedule?.trainNumber == schedule.trainNumber
         : selectedDepartureSchedule?.trainNumber == schedule.trainNumber;
@@ -207,9 +212,14 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 3),
-          Text('출발: ${DateFormat('HH:mm').format(schedule.departureTime)}, '
-              '도착: ${DateFormat('HH:mm').format(schedule.arrivalTime)} '
-              '소요시간: $durationStr'),
+          Text(
+            '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(schedule.departureTime)}, ' +
+                '${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(schedule.arrivalTime)}',
+          ),
+          SizedBox(height: 2), // 줄 간격 조정
+          Text(
+            '${AppLocalizations.of(context).translate('소요시간')}: $durationStr',
+          ),
         ],
       ),
       onTap: () => _selectSchedule(schedule, isReturn),

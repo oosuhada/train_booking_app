@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const CircularProgressIndicator(),
             const SizedBox(height: 20),
             Text(
-              '로딩중입니다...',
+              'Loading...',
               style: TextStyle(
                 fontSize: 18,
                 color: Theme.of(context).brightness == Brightness.dark

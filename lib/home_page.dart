@@ -445,7 +445,7 @@ class _HomePageState extends State<HomePage> {
         );
         if (selectedStation != null) {
           setState(() {
-            if (label == '출발역') {
+            if (label == AppLocalizations.of(context).translate('출발역')) {
               departureStation = selectedStation;
             } else {
               arrivalStation = selectedStation;
@@ -458,20 +458,33 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            label,
+            AppLocalizations.of(context).translate(label),
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
           ),
           SizedBox(height: 10),
-          Text(station ?? AppLocalizations.of(context).translate('선택'),
-              style: TextStyle(
-                fontSize: 40,
-                color: station == null
-                    ? Colors.grey // '선택' 텍스트의 색상
-                    : Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black87 // 다크 모드에서 선택된 역 이름 색상
-                        : Colors.black87, // 라이트 모드에서 선택된 역 이름 색상
-              )),
+          Container(
+            height: 60,
+            width: 150,
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Center(
+              child: AutoSizeText(
+                station != null
+                    ? AppLocalizations.of(context).translate(station)
+                    : AppLocalizations.of(context).translate('선택'),
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2, // 줄 간격 조정
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                minFontSize: 18,
+                stepGranularity: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -577,6 +590,8 @@ class _HomePageState extends State<HomePage> {
                       childCount: childCount,
                       seniorCount: seniorCount,
                       isRoundTrip: isRoundTrip,
+                      selectedLocale:
+                          Localizations.localeOf(context), // 현재 선택된 언어 전달
                     ),
                   ),
                 );

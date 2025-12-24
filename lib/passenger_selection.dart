@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_localizations.dart';
 
 class PassengerSelectionPage extends StatefulWidget {
   final int adultCount;
@@ -38,9 +39,9 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
+              Text(AppLocalizations.of(context).translate(title),
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text(subtitle,
+              Text(AppLocalizations.of(context).translate(subtitle),
                   style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
@@ -66,7 +67,7 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('인원 선택'),
+        title: Text(AppLocalizations.of(context).translate('인원 선택')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -105,7 +106,8 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Text('취소',
+                        child: Text(
+                            AppLocalizations.of(context).translate('취소'),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18)),
                       ),
@@ -128,7 +130,8 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Text('확인',
+                        child: Text(
+                            AppLocalizations.of(context).translate('확인'),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18)),
                       ),
