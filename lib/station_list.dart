@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_localizations.dart';
 
 class StationListPage extends StatelessWidget {
   final List<String> stations = [

@@ -164,81 +164,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(width: 5),
                     // 승차권 관리 탭
-                    Expanded(
-                      child: Container(
-                        height: 70,
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.article, color: Colors.white),
-                            SizedBox(height: 5),
-                            Text(
-                              AppLocalizations.of(context).translate('승차권 관리'),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _buildTabItem(context, Icons.article, '승차권 관리'),
                     // 열차위치 확인 탭
-                    Expanded(
-                      child: Container(
-                        height: 70,
-                        margin: EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.location_on, color: Colors.white),
-                            SizedBox(height: 5),
-                            Text(
-                              AppLocalizations.of(context).translate('열차위치 확인'),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // 상단 탭 Row에 언어 선택 탭 추가
-                    Expanded(
-                        child: GestureDetector(
-                            onTap: _showLanguageDialog,
-                            child: Container(
-                              height: 70,
-                              margin: EdgeInsets.symmetric(horizontal: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.language, color: Colors.white),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    'Language',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )))
+                    _buildTabItem(context, Icons.location_on, '열차위치 확인'),
+                    // 언어 선택 탭
+                    _buildTabItem(context, Icons.language, 'Language',
+                        onTap: _showLanguageDialog),
                   ],
                 ),
               ),
@@ -368,6 +299,49 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildTabItem(BuildContext context, IconData icon, String text,
+      {VoidCallback? onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 70,
+          margin: EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(8), // 모든 방향으로 패딩 추가
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 24),
+                SizedBox(height: 4),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      text == 'Language'
+                          ? text
+                          : AppLocalizations.of(context).translate(text),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10, // 폰트 크기를 약간 줄임
+                        color: Colors.white,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDateButton(
       String label, DateTime? date, Function(DateTime?) onPicked) {
     return GestureDetector(
@@ -407,7 +381,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStationSelector() {
     return Container(
-      height: 200,
+      height: 150, // 높이를 200에서 150으로 줄임
       decoration: BoxDecoration(
         color: Colors.white30,
         borderRadius: BorderRadius.circular(20),
@@ -415,7 +389,7 @@ class _HomePageState extends State<HomePage> {
       child: Stack(
         children: [
           Positioned(
-            top: 20,
+            top: 10, // 위치를 위로 조정
             left: 0,
             right: 0,
             child: Center(
@@ -442,7 +416,7 @@ class _HomePageState extends State<HomePage> {
               ),
               Container(
                 width: 2,
-                height: 50,
+                height: 40, // 높이를 50에서 40으로 줄임
                 color: Colors.grey[400],
               ),
               Expanded(
@@ -504,8 +478,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildPassengerAndTripTypeSelector() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
           onTap: () async {
@@ -528,29 +502,16 @@ class _HomePageState extends State<HomePage> {
             }
           },
           child: Text(
-            AppLocalizations.of(context).translate('인원 선택') +
-                ': ' +
-                AppLocalizations.of(context).translate('어른') +
-                ' $adultCount' +
-                (childCount > 0
-                    ? ', ' +
-                        AppLocalizations.of(context).translate('어린이') +
-                        ' $childCount'
-                    : '') +
-                (seniorCount > 0
-                    ? ', ' +
-                        AppLocalizations.of(context).translate('경로') +
-                        ' $seniorCount'
-                    : ''),
+            _buildPassengerSummary(),
             style: TextStyle(fontSize: 16),
           ),
         ),
-        SizedBox(width: 15),
+        SizedBox(height: 15),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: _buildAutoSizeText('편도'),
-            ),
+            Text(AppLocalizations.of(context).translate('편도')),
+            SizedBox(width: 20),
             Switch(
               value: isRoundTrip,
               onChanged: (value) {
@@ -562,26 +523,26 @@ class _HomePageState extends State<HomePage> {
                 });
               },
             ),
-            Expanded(
-              child: _buildAutoSizeText('왕복'),
-            ),
+            SizedBox(width: 20),
+            Text(AppLocalizations.of(context).translate('왕복')),
           ],
-        )
+        ),
       ],
     );
   }
 
-  Widget _buildAutoSizeText(String key) {
-    final locale = Localizations.localeOf(context);
-    final isEnglish = locale.languageCode == 'en';
-
-    return AutoSizeText(
-      AppLocalizations.of(context).translate(key),
-      maxLines: 1,
-      minFontSize: isEnglish ? 4 : 14, // 영어일 때 최소 폰트 크기를 더 작게 설정
-      style: TextStyle(fontSize: isEnglish ? 4 : 16), // 영어일 때 기본 폰트 크기를 작게 설정
-      textAlign: isEnglish ? TextAlign.center : TextAlign.center,
-    );
+  String _buildPassengerSummary() {
+    List<String> parts = [];
+    if (adultCount > 0) {
+      parts.add('${AppLocalizations.of(context).translate('어른')} $adultCount');
+    }
+    if (childCount > 0) {
+      parts.add('${AppLocalizations.of(context).translate('어린이')} $childCount');
+    }
+    if (seniorCount > 0) {
+      parts.add('${AppLocalizations.of(context).translate('경로')} $seniorCount');
+    }
+    return '${AppLocalizations.of(context).translate('인원 선택')}: ${parts.join(', ')}';
   }
 
   Widget _buildBookButton() {

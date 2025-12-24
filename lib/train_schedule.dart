@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'seat_page.dart';
+import 'app_localizations.dart';
 
 class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
