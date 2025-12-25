@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'home_page.dart';
 import 'app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const MyApp());
 }
 
@@ -29,6 +27,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'K Rail',
       locale: _locale,
 
@@ -46,12 +45,27 @@ class _MyAppState extends State<MyApp> {
         Locale('zh'),
       ],
       theme: ThemeData(
-        primarySwatch: Colors.purple,
-        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6D28D9),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF7F7FB),
+        cardTheme: CardTheme(
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
       ),
       darkTheme: ThemeData(
-        primarySwatch: Colors.purple,
-        scaffoldBackgroundColor: Colors.grey[900],
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8B5CF6),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFF111118),
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
@@ -64,9 +78,9 @@ class SplashScreen extends StatefulWidget {
   final Function(Locale) onLanguageChanged;
 
   const SplashScreen({
-    Key? key,
+    super.key,
     required this.onLanguageChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -80,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(milliseconds: 900));
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
