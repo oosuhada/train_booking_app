@@ -112,7 +112,7 @@ class _SeatPageState extends State<SeatPage>
 
     if (widget.isRoundTrip && selectedReturnDate != null) {
       returnSchedules = allSchedules['return'];
-      returnSchedule = returnSchedules?.first;
+      returnSchedule = widget.returnSchedule ?? returnSchedules?.first;
     }
 
     // selectedSeatsByType 초기화
@@ -396,56 +396,25 @@ class _SeatPageState extends State<SeatPage>
                       if (col > 2) col--;
 
                       return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (seats[row][col]) {
-                              seats[row][col] = false;
-                              String seatNumber =
-                                  '${row + 1}${String.fromCharCode(65 + col)}';
-                              if (isSelectingReturn) {
-                                selectedReturnSeats.remove(seatNumber);
-                              } else {
-                                selectedSeats.remove(seatNumber);
-                              }
-                              if ((isSelectingReturn
-                                      ? selectedReturnSeats
-                                      : selectedSeats)
-                                  .isEmpty) {
-                                _controller.reverse();
-                              }
-                            } else if ((isSelectingReturn
-                                        ? selectedReturnSeats
-                                        : selectedSeats)
-                                    .length <
-                                widget.adultCount +
-                                    widget.childCount +
-                                    widget.seniorCount) {
-                              seats[row][col] = true;
-                              String seatNumber =
-                                  '${row + 1}${String.fromCharCode(65 + col)}';
-                              if (isSelectingReturn) {
-                                selectedReturnSeats.add(seatNumber);
-                              } else {
-                                selectedSeats.add(seatNumber);
-                              }
-                              if (!_controller.isCompleted) {
-                                _controller.forward();
-                              }
-                            }
-                          });
-                        },
+                        onTap: () => _selectSeat(row, col),
                         child: Container(
                           margin: EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: seats[row][col]
-                                ? Colors.purple
-                                : Colors.grey[300],
+                            color: isSelectingReturn
+                                ? (selectedReturnSeats.contains(
+                                        '${row + 1}${String.fromCharCode(65 + col)}')
+                                    ? Colors.purple
+                                    : Colors.grey[300])
+                                : (selectedSeats.contains(
+                                        '${row + 1}${String.fromCharCode(65 + col)}')
+                                    ? Colors.purple
+                                    : Colors.grey[300]),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                       );
                     },
-                  ),
+                  )
                 ],
               ),
             ),
@@ -584,55 +553,59 @@ class _SeatPageState extends State<SeatPage>
   //좌석 선택 시 bottom panel에 실시간으로 선택 좌석 표시하는 메서드
   List<Widget> _buildPassengerTypeInfo() {
     List<Widget> widgets = [];
-    for (String type in ['어른', '어린이', '경로']) {
+
+    for (String type in passengerOrder) {
       int count = _getPassengerTypeCount(type);
       if (count > 0) {
-        List<String> selectedSeats = selectedSeatsByType[type] ?? [];
+        List<String> typeSeats = selectedSeatsByType[type] ?? [];
         widgets.add(
           Padding(
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
-              '$type: $count명 (선택된 좌석: ${selectedSeats.isNotEmpty ? selectedSeats.join(", ") : "-"})',
+              '$type: $count명 (선택된 좌석: ${typeSeats.isEmpty ? "-" : typeSeats.join(", ")})',
               style: TextStyle(fontSize: 16),
             ),
           ),
         );
       }
     }
+
     return widgets;
   }
 
 // Part6. 좌석 선택 관련 메서드들
   // 좌석을 선택하거나 선택 해제하는 메서드 - 도착편 좌석 선택도 가능하게 수정
   void _selectSeat(int row, int col) {
+    String seatNumber = '${row + 1}${String.fromCharCode(65 + col)}';
+
     setState(() {
-      String seatNumber = '${row + 1}${String.fromCharCode(65 + col)}';
       if (isSelectingReturn) {
         if (seats[row][col]) {
+          // 이미 선택된 좌석 해제
           seats[row][col] = false;
           selectedReturnSeats.remove(seatNumber);
           _removeSeat(seatNumber);
-        } else {
-          if (_canSelectMoreSeats()) {
-            seats[row][col] = true;
-            selectedReturnSeats.add(seatNumber);
-            _addSeat(seatNumber);
-          }
+        } else if (_canSelectMoreSeats()) {
+          // 새로운 좌석 선택
+          seats[row][col] = true;
+          selectedReturnSeats.add(seatNumber);
+          _addSeat(seatNumber);
         }
       } else {
         if (seats[row][col]) {
+          // 이미 선택된 좌석 해제
           seats[row][col] = false;
           selectedSeats.remove(seatNumber);
           _removeSeat(seatNumber);
-        } else {
-          if (_canSelectMoreSeats()) {
-            seats[row][col] = true;
-            selectedSeats.add(seatNumber);
-            _addSeat(seatNumber);
-          }
+        } else if (_canSelectMoreSeats()) {
+          // 새로운 좌석 선택
+          seats[row][col] = true;
+          selectedSeats.add(seatNumber);
+          _addSeat(seatNumber);
         }
       }
 
+      // 애니메이션 컨트롤러 업데이트
       if (_getTotalSelectedSeats() == 0) {
         _controller.reverse();
       } else if (!_controller.isCompleted) {
@@ -641,26 +614,32 @@ class _SeatPageState extends State<SeatPage>
     });
   }
 
-  // 선택된 좌석을 추가하는 메서드
+  // 선택된 좌석을 추가하는 메서드 수정
   void _addSeat(String seatNumber) {
     for (String type in passengerOrder) {
-      if ((selectedSeatsByType[type]?.length ?? 0) <
-          _getPassengerTypeCount(type)) {
-        selectedSeatsByType[type] ??= [];
-        selectedSeatsByType[type]!.add(seatNumber);
+      int typeCount = _getPassengerTypeCount(type);
+      List<String> typeSeats = selectedSeatsByType[type] ?? [];
+
+      if (typeSeats.length < typeCount) {
+        setState(() {
+          selectedSeatsByType[type] ??= [];
+          selectedSeatsByType[type]!.add(seatNumber);
+        });
         break;
       }
     }
   }
 
-  // 선택된 좌석을 제거하는 메서드
+  // 선택된 좌석을 제거하는 메서드 수정
   void _removeSeat(String seatNumber) {
-    for (String type in passengerOrder) {
-      if (selectedSeatsByType[type]?.contains(seatNumber) ?? false) {
-        selectedSeatsByType[type]!.remove(seatNumber);
-        break;
+    setState(() {
+      for (String type in passengerOrder) {
+        if (selectedSeatsByType[type]?.contains(seatNumber) ?? false) {
+          selectedSeatsByType[type]!.remove(seatNumber);
+          break;
+        }
       }
-    }
+    });
   }
 
   // 모든 좌석이 선택되었는지 확인하는 새로운 메서드 추가
@@ -676,8 +655,10 @@ class _SeatPageState extends State<SeatPage>
 
   // 더 많은 좌석을 선택할 수 있는지 확인하는 메서드
   bool _canSelectMoreSeats() {
-    return _getTotalSelectedSeats() <
-        widget.adultCount + widget.childCount + widget.seniorCount;
+    int totalSeats = widget.adultCount + widget.childCount + widget.seniorCount;
+    return isSelectingReturn
+        ? selectedReturnSeats.length < totalSeats
+        : selectedSeats.length < totalSeats;
   }
 
   // 총 선택된 좌석 수를 반환하는 메서드
