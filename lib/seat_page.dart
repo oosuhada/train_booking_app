@@ -562,7 +562,10 @@ class _SeatPageState extends State<SeatPage>
           Padding(
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
-              '$type: $count명 (선택된 좌석: ${typeSeats.isEmpty ? "-" : typeSeats.join(", ")})',
+              '${AppLocalizations.of(context).translate(type)}: '
+              '${count}  '
+              '(${AppLocalizations.of(context).translate('선택됨')}: '
+              '${typeSeats.isEmpty ? "-" : typeSeats.join(", ")})',
               style: TextStyle(fontSize: 16),
             ),
           ),
