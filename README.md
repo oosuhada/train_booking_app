@@ -69,19 +69,6 @@ flutter run
 
 No API key, Firebase project, or private credential is required for the current demo flow.
 
-## Validation / 검증
-
-포트폴리오 빌드 기준 실제 수행한 검증 결과입니다.
-
-Validation performed for the portfolio build:
-
-- `flutter pub get` — 정상 완료 / completed successfully.
-- `flutter test` — 테스트 통과 / passed.
-- `flutter analyze` — **0 errors, 0 warnings, 25 legacy info-level lints**.
-- `flutter build apk --debug` — Android debug build 성공 / completed successfully.
-- Android Emulator API 35 — 앱 설치 후 홈 → 시간표 → 좌석 → 예약 확인 전체 흐름 검증 / full booking journey exercised on-device.
-- Emulator logcat — 캡처 흐름에서 Flutter exception, fatal exception, RenderFlex overflow 없음 / no Flutter exception, fatal exception, or RenderFlex overflow found during the captured flow.
-
 ## Demo Note / 데모 안내
 
 이 저장소의 K-Rail은 포트폴리오 데모이며 실제 철도 예약 또는 결제 서비스와 연결되어 있지 않습니다. 시간표, 좌석, 요금, 쿠폰, 예약 정보는 시연 목적의 데이터입니다.
