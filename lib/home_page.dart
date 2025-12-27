@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'app_localizations.dart';
 import 'package:country_flags/country_flags.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'v2/v2_glass.dart';
 
 class HomePage extends StatefulWidget {
   final Function(Locale) onLanguageChanged;
@@ -117,214 +118,220 @@ class _HomePageState extends State<HomePage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'K-Rail',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Language',
-            onPressed: _showLanguageDialog,
-            icon: const Icon(Icons.language_rounded),
+      body: Column(
+        children: [
+          AppGlassToolbar(
+            title: 'K-Rail',
+            trailing: IconButton(
+              tooltip: 'Language',
+              onPressed: _showLanguageDialog,
+              icon: const Icon(Icons.language_rounded),
+            ),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      colorScheme.primary,
-                      const Color(0xFF8B5CF6),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(28),
-                ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
+                      margin: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                      padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Text(
-                        'K-RAIL · DEMO',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppLocalizations.of(context).translate('승차권 예매'),
-                      style: const TextStyle(
-                        fontSize: 30,
-                        height: 1.1,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '수서에서 부산까지, 원하는 여정을 빠르게 찾아보세요.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        height: 1.45,
-                        color: Colors.white.withValues(alpha: 0.86),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '여정 선택',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    isRoundTrip
-                                        ? AppLocalizations.of(context)
-                                            .translate('왕복')
-                                        : AppLocalizations.of(context)
-                                            .translate('편도'),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 18),
-                            _buildStationSelector(),
-                            const Divider(height: 32),
-                            _buildDateSelector(),
-                            const Divider(height: 32),
-                            _buildPassengerAndTripTypeSelector(),
-                            const SizedBox(height: 20),
-                            _buildBookButton(),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            colorScheme.primary,
+                            const Color(0xFF8B5CF6),
                           ],
                         ),
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                    ),
-                    const SizedBox(height: 22),
-                    Text(
-                      '빠른 서비스',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _buildQuickService(
-                          Icons.confirmation_number_outlined,
-                          AppLocalizations.of(context).translate('승차권 관리'),
-                        ),
-                        const SizedBox(width: 10),
-                        _buildQuickService(
-                          Icons.train_outlined,
-                          AppLocalizations.of(context).translate('열차위치 확인'),
-                        ),
-                        const SizedBox(width: 10),
-                        _buildQuickService(
-                          Icons.language_rounded,
-                          'Language',
-                          onTap: _showLanguageDialog,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'asset/KRAIL_LOGO.jpg',
-                                width: 64,
-                                height: 64,
-                                fit: BoxFit.cover,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Text(
+                              'K-RAIL · DEMO',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
                               ),
                             ),
-                            const SizedBox(width: 14),
-                            const Expanded(
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context).translate('승차권 예매'),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              height: 1.1,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '수서에서 부산까지, 원하는 여정을 빠르게 찾아보세요.',
+                            style: TextStyle(
+                              fontSize: 15,
+                              height: 1.45,
+                              color: Colors.white.withValues(alpha: 0.86),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(18),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'K-Rail mobile booking',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w800,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '여정 선택',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w800),
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.secondaryContainer,
+                                          borderRadius:
+                                              BorderRadius.circular(999),
+                                        ),
+                                        child: Text(
+                                          isRoundTrip
+                                              ? AppLocalizations.of(context)
+                                                  .translate('왕복')
+                                              : AppLocalizations.of(context)
+                                                  .translate('편도'),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 18),
+                                  _buildStationSelector(),
+                                  const Divider(height: 32),
+                                  _buildDateSelector(),
+                                  const Divider(height: 32),
+                                  _buildPassengerAndTripTypeSelector(),
+                                  const SizedBox(height: 20),
+                                  _buildBookButton(),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          Text(
+                            '빠른 서비스',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _buildQuickService(
+                                Icons.confirmation_number_outlined,
+                                AppLocalizations.of(context)
+                                    .translate('승차권 관리'),
+                              ),
+                              const SizedBox(width: 10),
+                              _buildQuickService(
+                                Icons.train_outlined,
+                                AppLocalizations.of(context)
+                                    .translate('열차위치 확인'),
+                              ),
+                              const SizedBox(width: 10),
+                              _buildQuickService(
+                                Icons.language_rounded,
+                                'Language',
+                                onTap: _showLanguageDialog,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 14,
+                              ),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.asset(
+                                      'asset/KRAIL_LOGO.jpg',
+                                      width: 64,
+                                      height: 64,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    '시간표 · 좌석 선택 · 결제까지 이어지는 데모 플로우',
-                                    style: TextStyle(fontSize: 12),
+                                  const SizedBox(width: 14),
+                                  const Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'K-Rail mobile booking',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          '시간표 · 좌석 선택 · 결제까지 이어지는 데모 플로우',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -356,7 +363,7 @@ class _HomePageState extends State<HomePage> {
               }),
             ),
             if (isRoundTrip) ...[
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: _buildDateButton(
                     AppLocalizations.of(context).translate('오는 날'), returnDate,
@@ -388,10 +395,10 @@ class _HomePageState extends State<HomePage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          margin: EdgeInsets.all(16),
-                          padding: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 16),
-                          duration: Duration(seconds: 4),
+                          duration: const Duration(seconds: 4),
                           action: SnackBarAction(
                             label: AppLocalizations.of(context).translate('확인'),
                             textColor: Theme.of(context).colorScheme.secondary,
@@ -421,7 +428,7 @@ class _HomePageState extends State<HomePage> {
           context: context,
           initialDate: date ?? DateTime.now(),
           firstDate: DateTime.now(),
-          lastDate: DateTime.now().add(Duration(days: 365)),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
           locale: Localizations.localeOf(context),
         );
         if (picked != null && picked != date) {
@@ -507,7 +514,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStationButton(
       String label, String? station, String? otherStation) {
-    return GestureDetector(
+    return AppGlassSurface(
+      semanticLabel: '$label ${station ?? '선택'}',
       onTap: () async {
         final selectedStation = await Navigator.push(
           context,
@@ -526,37 +534,33 @@ class _HomePageState extends State<HomePage> {
           });
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context).translate(label),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+      borderRadius: BorderRadius.circular(20),
+      blurSigma: 14,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      child: Column(
+        children: [
+          Text(
+            AppLocalizations.of(context).translate(label),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 7),
-            AutoSizeText(
-              station != null
-                  ? AppLocalizations.of(context).translate(station)
-                  : AppLocalizations.of(context).translate('선택'),
-              style: const TextStyle(
-                fontSize: 27,
-                fontWeight: FontWeight.w800,
-              ),
-              maxLines: 1,
-              minFontSize: 16,
-              overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 7),
+          AutoSizeText(
+            station != null
+                ? AppLocalizations.of(context).translate(station)
+                : AppLocalizations.of(context).translate('선택'),
+            style: const TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.w800,
             ),
-          ],
-        ),
+            maxLines: 1,
+            minFontSize: 16,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -565,7 +569,8 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
+        AppGlassSurface(
+          semanticLabel: _buildPassengerSummary(),
           onTap: () async {
             final result = await Navigator.push(
               context,
@@ -585,48 +590,40 @@ class _HomePageState extends State<HomePage> {
               });
             }
           },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.people_alt_outlined, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _buildPassengerSummary(),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
+          borderRadius: BorderRadius.circular(18),
+          blurSigma: 14,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          child: Row(
+            children: [
+              const Icon(Icons.people_alt_outlined, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _buildPassengerSummary(),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                const Icon(Icons.chevron_right_rounded),
-              ],
-            ),
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
           ),
         ),
         const SizedBox(height: 14),
-        Row(
-          children: [
-            ChoiceChip(
-              label: Text(AppLocalizations.of(context).translate('편도')),
-              selected: !isRoundTrip,
-              onSelected: (_) => setState(() => isRoundTrip = false),
-            ),
-            const SizedBox(width: 8),
-            ChoiceChip(
-              label: Text(AppLocalizations.of(context).translate('왕복')),
-              selected: isRoundTrip,
-              onSelected: (_) {
-                setState(() {
-                  isRoundTrip = true;
+        SizedBox(
+          width: 220,
+          child: AppGlassSegmentedControl<bool>(
+            values: const [false, true],
+            selected: isRoundTrip,
+            labelBuilder: (value) =>
+                AppLocalizations.of(context).translate(value ? '왕복' : '편도'),
+            onSelected: (value) {
+              setState(() {
+                isRoundTrip = value;
+                if (value) {
                   returnDate ??= departureDate?.add(const Duration(days: 1));
-                });
-              },
-            ),
-          ],
+                }
+              });
+            },
+          ),
         ),
       ],
     );

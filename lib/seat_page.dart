@@ -5,6 +5,7 @@ import 'app_localizations.dart';
 import 'payment_page.dart';
 import 'station_list.dart';
 import 'train_schedule.dart';
+import 'v2/v2_glass.dart';
 
 class SeatPage extends StatefulWidget {
   final String departure;
@@ -142,46 +143,52 @@ class _SeatPageState extends State<SeatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).translate(
-            _isSelectingReturn ? '도착편 좌석 선택' : '출발편 좌석 선택',
+      extendBody: true,
+      body: Column(
+        children: [
+          AppGlassToolbar(
+            title: AppLocalizations.of(context).translate(
+              _isSelectingReturn ? '도착편 좌석 선택' : '출발편 좌석 선택',
+            ),
+            onBack: () => Navigator.of(context).maybePop(),
           ),
-          style: const TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTripSummary(),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Text(
-                    AppLocalizations.of(context).translate('좌석 배치'),
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w900),
-                  ),
-                  const Spacer(),
-                  _pill(
-                    Icons.train_rounded,
-                    AppLocalizations.of(context).translate('3호차 · 일반실'),
-                  ),
-                ],
+          Expanded(
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTripSummary(),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context).translate('좌석 배치'),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
+                        ),
+                        const Spacer(),
+                        _pill(
+                          Icons.train_rounded,
+                          AppLocalizations.of(context).translate('3호차 · 일반실'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildLegend(),
+                    const SizedBox(height: 14),
+                    _buildSeatMap(),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              _buildLegend(),
-              const SizedBox(height: 14),
-              _buildSeatMap(),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: _buildBottomBar(),
     );
@@ -213,7 +220,8 @@ class _SeatPageState extends State<SeatPage> {
               const Spacer(),
               Text(
                 DateFormat('M월 d일 (E)', 'ko').format(schedule.departureTime),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -228,7 +236,8 @@ class _SeatPageState extends State<SeatPage> {
                       '${duration.inHours}${AppLocalizations.of(context).translate('시간')} ${duration.inMinutes % 60}${AppLocalizations.of(context).translate('분')}',
                       style: TextStyle(
                         fontSize: 11,
-                        color: scheme.onPrimaryContainer.withValues(alpha: 0.72),
+                        color:
+                            scheme.onPrimaryContainer.withValues(alpha: 0.72),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -442,9 +451,8 @@ class _SeatPageState extends State<SeatPage> {
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.circular(11),
-            border: isSelected
-                ? Border.all(color: scheme.primary, width: 2)
-                : null,
+            border:
+                isSelected ? Border.all(color: scheme.primary, width: 2) : null,
           ),
           alignment: Alignment.center,
           child: Text(
@@ -465,87 +473,77 @@ class _SeatPageState extends State<SeatPage> {
     final complete = _currentSelection.length == _requiredSeats;
     final seats = _currentSelection.toList()..sort();
 
-    return SafeArea(
-      top: false,
-      child: Material(
-        color: scheme.surface,
-        elevation: 12,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return AppGlassBottomBar(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context).translate('선택 좌석'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          seats.isEmpty
-                              ? AppLocalizations.of(context)
-                                  .translate('좌석을 선택하세요')
-                              : seats.join(', '),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).translate('선택 좌석'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context).translate('예상 결제금액'),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                      Text(
-                        '${NumberFormat('#,###').format(_totalPrice)}${AppLocalizations.of(context).translate('원')}',
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: complete ? _continue : null,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      widget.isRoundTrip && !_isSelectingReturn
-                          ? AppLocalizations.of(context)
-                              .translate('돌아오는 편 좌석 선택')
-                          : AppLocalizations.of(context).translate('다음'),
+                    const SizedBox(height: 2),
+                    Text(
+                      seats.isEmpty
+                          ? AppLocalizations.of(context).translate('좌석을 선택하세요')
+                          : seats.join(', '),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                  ),
+                  ],
                 ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).translate('예상 결제금액'),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    '${NumberFormat('#,###').format(_totalPrice)}${AppLocalizations.of(context).translate('원')}',
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: complete ? _continue : null,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  widget.isRoundTrip && !_isSelectingReturn
+                      ? AppLocalizations.of(context).translate('돌아오는 편 좌석 선택')
+                      : AppLocalizations.of(context).translate('다음'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

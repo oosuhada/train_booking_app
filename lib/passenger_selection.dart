@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'app_localizations.dart';
+import 'v2/v2_glass.dart';
 
 class PassengerSelectionPage extends StatefulWidget {
   final int adultCount;
   final int childCount;
   final int seniorCount;
 
-  PassengerSelectionPage({
+  const PassengerSelectionPage({
+    super.key,
     required this.adultCount,
     required this.childCount,
     required this.seniorCount,
   });
 
   @override
-  _PassengerSelectionPageState createState() => _PassengerSelectionPageState();
+  State<PassengerSelectionPage> createState() => _PassengerSelectionPageState();
 }
 
 class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
@@ -40,20 +42,21 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(AppLocalizations.of(context).translate(title),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               Text(AppLocalizations.of(context).translate(subtitle),
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.remove),
+                icon: const Icon(Icons.remove),
                 onPressed: count > 0 ? () => onChanged(count - 1) : null,
               ),
-              Text('$count', style: TextStyle(fontSize: 18)),
+              Text('$count', style: const TextStyle(fontSize: 18)),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 onPressed: () => onChanged(count + 1),
               ),
             ],
@@ -66,85 +69,76 @@ class _PassengerSelectionPageState extends State<PassengerSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('인원 선택')),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildCounterRow(
-              '어른',
-              '만 13세 이상',
-              _adultCount,
-              (newCount) => setState(() => _adultCount = newCount),
-            ),
-            Divider(height: 32),
-            _buildCounterRow(
-              '어린이',
-              '만 6세 ~ 만 12세',
-              _childCount,
-              (newCount) => setState(() => _childCount = newCount),
-            ),
-            Divider(height: 32),
-            _buildCounterRow(
-              '경로',
-              '만 65세 이상',
-              _seniorCount,
-              (newCount) => setState(() => _seniorCount = newCount),
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Text(
-                            AppLocalizations.of(context).translate('취소'),
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 18)),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                      ),
+      body: Column(
+        children: [
+          AppGlassToolbar(
+            title: AppLocalizations.of(context).translate('인원 선택'),
+            onBack: () => Navigator.of(context).maybePop(),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildCounterRow(
+                    '어른',
+                    '만 13세 이상',
+                    _adultCount,
+                    (newCount) => setState(() => _adultCount = newCount),
+                  ),
+                  const Divider(height: 32),
+                  _buildCounterRow(
+                    '어린이',
+                    '만 6세 ~ 만 12세',
+                    _childCount,
+                    (newCount) => setState(() => _childCount = newCount),
+                  ),
+                  const Divider(height: 32),
+                  _buildCounterRow(
+                    '경로',
+                    '만 65세 이상',
+                    _seniorCount,
+                    (newCount) => setState(() => _seniorCount = newCount),
+                  ),
+                  const Spacer(),
+                  AppGlassBottomBar(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Text(
+                                  AppLocalizations.of(context).translate('취소')),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context, {
+                                'adult': _adultCount,
+                                'child': _childCount,
+                                'senior': _seniorCount,
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Text(
+                                  AppLocalizations.of(context).translate('확인')),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context, {
-                          'adult': _adultCount,
-                          'child': _childCount,
-                          'senior': _seniorCount,
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Text(
-                            AppLocalizations.of(context).translate('확인'),
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 18)),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

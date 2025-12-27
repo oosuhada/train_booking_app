@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'app_localizations.dart';
 import 'seat_page.dart';
 import 'station_list.dart';
+import 'v2/v2_glass.dart';
 
 class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
@@ -121,38 +122,43 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).translate('열차시간표'),
-          style: const TextStyle(fontWeight: FontWeight.w800),
-        ),
-        bottom: widget.isRoundTrip
-            ? TabBar(
-                controller: _tabController,
-                tabs: [
-                  Tab(text: AppLocalizations.of(context).translate('출발편')),
-                  Tab(text: AppLocalizations.of(context).translate('도착편')),
+      body: Column(
+        children: [
+          AppGlassToolbar(
+            title: AppLocalizations.of(context).translate('열차시간표'),
+            onBack: () => Navigator.of(context).maybePop(),
+            bottom: widget.isRoundTrip
+                ? TabBar(
+                    controller: _tabController,
+                    tabs: [
+                      Tab(text: AppLocalizations.of(context).translate('출발편')),
+                      Tab(text: AppLocalizations.of(context).translate('도착편')),
+                    ],
+                  )
+                : null,
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: [
+                  _buildJourneyHeader(),
+                  Expanded(
+                    child: widget.isRoundTrip
+                        ? TabBarView(
+                            controller: _tabController,
+                            children: [
+                              _buildScheduleList(departureSchedules, false),
+                              _buildScheduleList(returnSchedules, true),
+                            ],
+                          )
+                        : _buildScheduleList(departureSchedules, false),
+                  ),
                 ],
-              )
-            : null,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildJourneyHeader(),
-            Expanded(
-              child: widget.isRoundTrip
-                  ? TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildScheduleList(departureSchedules, false),
-                        _buildScheduleList(returnSchedules, true),
-                      ],
-                    )
-                  : _buildScheduleList(departureSchedules, false),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -361,7 +367,8 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            Expanded(child: Divider(color: scheme.outlineVariant)),
+                            Expanded(
+                                child: Divider(color: scheme.outlineVariant)),
                             Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 6),
@@ -371,7 +378,8 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
                                 color: scheme.primary,
                               ),
                             ),
-                            Expanded(child: Divider(color: scheme.outlineVariant)),
+                            Expanded(
+                                child: Divider(color: scheme.outlineVariant)),
                           ],
                         ),
                       ],
@@ -486,7 +494,9 @@ class TrainScheduleService {
   static int calculateTravelTime(String departure, String arrival) {
     final departureIndex = stations.indexOf(departure);
     final arrivalIndex = stations.indexOf(arrival);
-    if (departureIndex < 0 || arrivalIndex < 0 || departureIndex == arrivalIndex) {
+    if (departureIndex < 0 ||
+        arrivalIndex < 0 ||
+        departureIndex == arrivalIndex) {
       return 0;
     }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'home_page.dart';
 import 'app_localizations.dart';
+import 'v2/v2_glass.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,12 +27,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const lightSeed = Color(0xFF6D28D9);
+    const darkSeed = Color(0xFF8B5CF6);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'K Rail',
       locale: _locale,
 
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -44,30 +47,8 @@ class _MyAppState extends State<MyApp> {
         Locale('ja'),
         Locale('zh'),
       ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6D28D9),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF7F7FB),
-        cardTheme: CardTheme(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8B5CF6),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF111118),
-        brightness: Brightness.dark,
-      ),
+      theme: V2GlassTheme.light(seed: lightSeed),
+      darkTheme: V2GlassTheme.dark(seed: darkSeed),
       themeMode: ThemeMode.system,
       home: SplashScreen(onLanguageChanged: _changeLanguage),
     );
