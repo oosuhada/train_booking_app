@@ -16,7 +16,7 @@ This is a 2026 UX renewal of the Flutter booking app I originally built while le
 | Navigation | Standard AppBar | Compact floating glass toolbar |
 | Seat/payment action | Opaque bottom bars | Glass bottom action layer with solid transactional content |
 | Accessibility | Material defaults | High-contrast opaque fallback, reduced-motion support, semantics, large tap targets |
-| Rendering | Styling-first | Blur limited to compact controls; schedule/seat/payment content stays solid |
+| Rendering | Styling-first | Glass-themed surface hierarchy for route, schedule, seat legend, booking review, and confirmation summaries while dense lists/grids stay solid |
 
 ### Overview / 프로젝트 소개
 
@@ -77,8 +77,9 @@ These screenshots were captured from the running Flutter app on an **Android Emu
 
 `lib/v2/v2_glass.dart`에 공통 renderer를 분리해 화면에서는 동일한 `AppGlass*` contract만 사용합니다. 향후 native material이나 shader renderer로 바꾸더라도 예약 화면의 제품 로직을 크게 수정하지 않아도 되는 경계를 의도했습니다.
 
-- **Content stays content / 콘텐츠는 solid 유지** — journey hero, train cards, seat map, fare breakdown, ticket/confirmation card는 blur 처리하지 않습니다.
-- **Controls float / 조작부만 glass** — station/passenger selection, trip segmented control, toolbar, seat/payment bottom actions에만 선택적으로 translucency를 사용합니다.
+- **Dense content stays sharp / 밀도 높은 콘텐츠는 선명하게 유지** — train list item과 seat map처럼 반복·선택 밀도가 높은 영역은 solid surface로 유지합니다.
+- **Summary hierarchy / 요약 정보도 glass 계층화** — route/schedule summary, seat legend, booking review의 journey·passenger·fare summary, confirmation ticket에는 낮은 강도의 translucency를 사용합니다.
+- **Controls float / 조작부 glass** — station/passenger selection, trip segmented control, toolbar, seat/payment bottom actions에는 더 강한 Liquid Glass-inspired control layer를 사용합니다.
 - **High contrast / 고대비** — `MediaQuery.highContrast`에서는 blur를 제거하고 opacity를 높입니다.
 - **Reduced motion / 모션 감소** — `MediaQuery.disableAnimations`에서는 segmented-control animation duration을 0으로 줄입니다.
 - **Performance / 성능** — list item·좌석마다 `BackdropFilter`를 만들지 않고 작은 control surface로 blur 영역을 제한합니다.
