@@ -68,3 +68,7 @@ No API key, Firebase project, or private credential is required for the current 
 이 저장소의 K-Rail은 포트폴리오 데모이며 실제 철도 예약 또는 결제 서비스와 연결되어 있지 않습니다. 시간표, 좌석, 요금, 쿠폰, 예약 정보는 시연 목적의 데이터입니다.
 
 K-Rail in this repository is a portfolio demo and is not connected to an actual railway reservation or payment service. Schedule, seat, fare, coupon, and reservation information are illustrative.
+
+## Topics
+
+[`dart`](https://github.com/topics/dart) · [`flutter`](https://github.com/topics/flutter) · [`localization`](https://github.com/topics/localization) · [`mobile-app`](https://github.com/topics/mobile-app) · [`reservation-system`](https://github.com/topics/reservation-system) · [`train-booking`](https://github.com/topics/train-booking) · [`travel-app`](https://github.com/topics/travel-app)
