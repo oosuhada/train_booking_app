@@ -69,6 +69,13 @@ No API key, Firebase project, or private credential is required for the current 
 
 K-Rail in this repository is a portfolio demo and is not connected to an actual railway reservation or payment service. Schedule, seat, fare, coupon, and reservation information are illustrative.
 
-## Topics
+## Architecture & Topics / 아키텍처 및 주제
 
-[`dart`](https://github.com/topics/dart) · [`flutter`](https://github.com/topics/flutter) · [`localization`](https://github.com/topics/localization) · [`mobile-app`](https://github.com/topics/mobile-app) · [`reservation-system`](https://github.com/topics/reservation-system) · [`train-booking`](https://github.com/topics/train-booking) · [`travel-app`](https://github.com/topics/travel-app) · [`booking`](https://github.com/topics/booking) · [`state-management`](https://github.com/topics/state-management) · [`mobile-development`](https://github.com/topics/mobile-development) · [`flutter-app`](https://github.com/topics/flutter-app) · [`cross-platform`](https://github.com/topics/cross-platform) · [`ui-design`](https://github.com/topics/ui-design) · [`flutter-development`](https://github.com/topics/flutter-development) · [`travel-tech`](https://github.com/topics/travel-tech)
+**Architecture / 아키텍처**<br>
+[`reactive-state-management`](https://github.com/topics/reactive-state-management) · [`unidirectional-data-flow`](https://github.com/topics/unidirectional-data-flow) · [`declarative-navigation`](https://github.com/topics/declarative-navigation) · [`localization-architecture`](https://github.com/topics/localization-architecture) · [`component-based-ui`](https://github.com/topics/component-based-ui) · [`client-side-state`](https://github.com/topics/client-side-state)
+
+**Project context / 프로젝트 맥락**<br>
+[`booking`](https://github.com/topics/booking) · [`cross-platform`](https://github.com/topics/cross-platform) · [`flutter-app`](https://github.com/topics/flutter-app) · [`flutter-development`](https://github.com/topics/flutter-development) · [`localization`](https://github.com/topics/localization) · [`mobile-app`](https://github.com/topics/mobile-app) · [`mobile-development`](https://github.com/topics/mobile-development) · [`reservation-system`](https://github.com/topics/reservation-system) · [`state-management`](https://github.com/topics/state-management) · [`train-booking`](https://github.com/topics/train-booking) · [`travel-app`](https://github.com/topics/travel-app) · [`travel-tech`](https://github.com/topics/travel-tech) · [`ui-design`](https://github.com/topics/ui-design)
+
+**Implementation stack / 구현 스택**<br>
+[`dart`](https://github.com/topics/dart) · [`flutter`](https://github.com/topics/flutter)
