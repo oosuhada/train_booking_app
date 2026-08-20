@@ -1,10 +1,14 @@
 # K-Rail Train Booking Demo
 
-A Flutter mobile demo for a Korean train-booking journey. It focuses on a clear end-to-end flow from route search to KTX schedule selection, seat selection, and a simulated booking confirmation.
+한국 철도 예매 경험을 모바일 환경에서 구현한 Flutter 포트폴리오 데모입니다. 출발지/도착지 선택부터 KTX 시간표 조회, 좌석 선택, 예약 확인까지 하나의 흐름으로 구성했습니다.
 
-The representative demo journey is **Suseo → Busan**, one-way, for one adult.
+A Flutter portfolio demo that recreates a Korean train-booking journey, from route selection and KTX schedules to seat selection and booking confirmation.
 
-## Preview
+대표 데모 여정은 **수서 → 부산 / 편도 / 성인 1명**입니다.
+
+The representative demo journey is **Suseo → Busan / one-way / one adult**.
+
+## Preview / 미리보기
 
 <p align="center">
   <img src=".github/assets/portfolio/01-home-booking.png" alt="K-Rail booking home" width="47%" />
@@ -15,34 +19,36 @@ The representative demo journey is **Suseo → Busan**, one-way, for one adult.
   <img src=".github/assets/portfolio/04-booking-confirmation.png" alt="K-Rail booking confirmation" width="47%" />
 </p>
 
-These screenshots were captured from the running app on an **Android Emulator (API 35, 1080×2400)**. They show the same booking flow from home through confirmation and are not Flutter Web renders or design mockups.
+위 이미지는 **Android Emulator (API 35, 1080×2400)** 에서 실제 Flutter 앱을 실행해 캡처했습니다. 홈 → 시간표 → 좌석 선택 → 예약 확인의 동일한 사용자 흐름을 보여주며 Flutter Web 렌더링이나 디자인 목업이 아닙니다.
 
-## What it does
+These screenshots were captured from the running Flutter app on an **Android Emulator (API 35, 1080×2400)**. They show the same home → schedule → seat → confirmation journey and are not Flutter Web renders or design mockups.
 
-- Select departure and arrival stations.
-- Choose travel date, passenger count, and one-way or round-trip travel.
-- Browse product-style KTX schedule cards with times, duration, price, and remaining seats.
-- Select seats from an interactive carriage grid with available, selected, and unavailable states.
-- Review itinerary, passenger, seat, coupon, and price information before a simulated checkout.
-- Show an in-app booking confirmation with reservation details.
-- Switch between Korean, English, Japanese, and Chinese UI strings.
+## What it does / 주요 기능
 
-## Architecture
+- 출발역과 도착역 선택 / Select departure and arrival stations.
+- 여행 날짜, 승객 수, 편도·왕복 선택 / Choose travel date, passenger count, and one-way or round-trip travel.
+- 출발·도착 시각, 소요 시간, 가격, 잔여석을 포함한 KTX 시간표 조회 / Browse KTX schedule cards with times, duration, fare, and remaining seats.
+- 선택 가능·선택됨·선택 불가 상태를 구분한 좌석 배치도 / Select seats from an interactive carriage grid with available, selected, and unavailable states.
+- 여정, 승객, 좌석, 쿠폰, 결제 금액 확인 / Review itinerary, passenger, seat, coupon, and price information.
+- 실제 결제 없이 데모 예약 완료 화면 제공 / Complete a simulated checkout and view booking confirmation details.
+- 한국어, 영어, 일본어, 중국어 UI 지원 / Switch between Korean, English, Japanese, and Chinese UI strings.
 
-- Flutter `StatefulWidget`-based screen flow using standard Navigator routes.
-- Booking data is passed through the home → schedule → seat → payment/confirmation flow.
-- Localization is handled with Flutter localization delegates and the app's `AppLocalizations` implementation.
-- Schedule, seat availability, pricing, and checkout behavior are local demo data; there is no production backend or payment gateway.
+## Architecture / 구조
 
-## Tech Stack
+- Flutter `StatefulWidget`과 기본 Navigator route를 이용한 화면 흐름 / Screen flow built with Flutter `StatefulWidget` and standard Navigator routes.
+- 홈 → 시간표 → 좌석 → 결제/예약 확인 단계로 예약 데이터 전달 / Booking data is passed through the home → schedule → seat → payment/confirmation flow.
+- Flutter localization delegate와 `AppLocalizations` 기반 다국어 처리 / Localization is handled with Flutter localization delegates and the app's `AppLocalizations` implementation.
+- 시간표, 좌석 상태, 가격, 결제 동작은 로컬 데모 데이터이며 실제 백엔드나 결제 게이트웨이는 사용하지 않음 / Schedule, seat availability, pricing, and checkout behavior use local demo data with no production backend or payment gateway.
+
+## Tech Stack / 기술 스택
 
 - Flutter / Dart
 - Material 3
 - `flutter_localizations`
 - `intl`
-- Android Emulator for device validation and portfolio captures
+- Android Emulator — 디바이스 검증 및 포트폴리오 캡처 / device validation and portfolio captures
 
-## Run
+## Run / 실행
 
 ```bash
 git clone https://github.com/oosuhada/train_booking_app.git
@@ -51,19 +57,25 @@ flutter pub get
 flutter run
 ```
 
+현재 데모 실행에는 API key, Firebase 프로젝트 또는 별도 credential이 필요하지 않습니다.
+
 No API key, Firebase project, or private credential is required for the current demo flow.
 
-## Validation
+## Validation / 검증
+
+포트폴리오 빌드 기준 실제 수행한 검증 결과입니다.
 
 Validation performed for the portfolio build:
 
-- `flutter pub get` — completed successfully.
-- `flutter test` — passed.
+- `flutter pub get` — 정상 완료 / completed successfully.
+- `flutter test` — 테스트 통과 / passed.
 - `flutter analyze` — **0 errors, 0 warnings, 25 legacy info-level lints**.
-- `flutter build apk --debug` — completed successfully.
-- Android Emulator API 35 — app installed and the full home → schedule → seat → confirmation journey was exercised.
-- Emulator logcat checks — no Flutter exception, fatal exception, or RenderFlex overflow was found during the captured flow.
+- `flutter build apk --debug` — Android debug build 성공 / completed successfully.
+- Android Emulator API 35 — 앱 설치 후 홈 → 시간표 → 좌석 → 예약 확인 전체 흐름 검증 / full booking journey exercised on-device.
+- Emulator logcat — 캡처 흐름에서 Flutter exception, fatal exception, RenderFlex overflow 없음 / no Flutter exception, fatal exception, or RenderFlex overflow found during the captured flow.
 
-## Demo note
+## Demo Note / 데모 안내
+
+이 저장소의 K-Rail은 포트폴리오 데모이며 실제 철도 예약 또는 결제 서비스와 연결되어 있지 않습니다. 시간표, 좌석, 요금, 쿠폰, 예약 정보는 시연 목적의 데이터입니다.
 
 K-Rail in this repository is a portfolio demo and is not connected to an actual railway reservation or payment service. Schedule, seat, fare, coupon, and reservation information are illustrative.
