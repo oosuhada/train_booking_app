@@ -16,16 +16,20 @@ The representative demo journey is **Suseo → Busan / one-way / one adult**.
 
 <p align="center">
   <img src=".github/assets/portfolio/01-home-booking.png" alt="K-Rail booking home" width="47%" />
-  <img src=".github/assets/portfolio/02-train-schedule.png" alt="K-Rail train schedule" width="47%" />
+  <img src=".github/assets/portfolio/05-station-selection.png" alt="K-Rail station selection" width="47%" />
 </p>
 <p align="center">
+  <img src=".github/assets/portfolio/02-train-schedule.png" alt="K-Rail train schedule" width="47%" />
   <img src=".github/assets/portfolio/03-seat-selection.png" alt="K-Rail seat selection" width="47%" />
+</p>
+<p align="center">
+  <img src=".github/assets/portfolio/06-booking-review.png" alt="K-Rail booking review before confirmation" width="47%" />
   <img src=".github/assets/portfolio/04-booking-confirmation.png" alt="K-Rail booking confirmation" width="47%" />
 </p>
 
-위 이미지는 **Android Emulator (API 35, 1080×2400)** 에서 실제 Flutter 앱을 실행해 캡처했습니다. 홈 → 시간표 → 좌석 선택 → 예약 확인의 동일한 사용자 흐름을 보여주며 Flutter Web 렌더링이나 디자인 목업이 아닙니다.
+위 이미지는 **Android Emulator (API 35, 1080×2400)** 에서 실제 Flutter 앱을 실행해 캡처했습니다. 홈 → 역 선택 → 시간표 → 좌석 선택 → 결제 전 예약 확인 → 예약 완료의 동일한 사용자 흐름을 보여주며 Flutter Web 렌더링이나 디자인 목업이 아닙니다.
 
-These screenshots were captured from the running Flutter app on an **Android Emulator (API 35, 1080×2400)**. They show the same home → schedule → seat → confirmation journey and are not Flutter Web renders or design mockups.
+These screenshots were captured from the running Flutter app on an **Android Emulator (API 35, 1080×2400)**. They show the same home → station selection → schedule → seat selection → booking review → confirmation journey and are not Flutter Web renders or design mockups.
 
 ## What it does / 주요 기능
 
