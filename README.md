@@ -4,11 +4,18 @@ A Flutter project - K-Rail 기차 예매 서비스 / K-Rail Train Booking Servic
 
 ## UI Preview / 구현 화면
 
-![K-Rail Flutter booking interface](.github/assets/ui-preview.png)
+<p align="center">
+  <img src=".github/assets/portfolio/01-home-booking.png" alt="K-Rail booking home" width="47%" />
+  <img src=".github/assets/portfolio/02-train-schedule.png" alt="K-Rail train schedule" width="47%" />
+</p>
+<p align="center">
+  <img src=".github/assets/portfolio/03-seat-selection.png" alt="K-Rail seat selection" width="47%" />
+  <img src=".github/assets/portfolio/04-booking-confirmation.png" alt="K-Rail booking confirmation" width="47%" />
+</p>
 
-이 이미지는 현재 저장소를 Flutter Web release 모드로 빌드한 뒤 실제 렌더링한 화면입니다. 실행하지 않고도 프로젝트의 예약 UI 방향을 빠르게 확인할 수 있도록 README에 포함했습니다.
+위 이미지는 **Android Emulator(API 35, 1080×2400)** 에서 실제 Flutter 앱을 실행한 뒤 `수서 → 부산` 편도 여정을 따라 직접 캡처한 화면입니다. 홈 → KTX 시간표 → 좌석 선택 → 예약 완료까지 하나의 모바일 예약 플로우로 이어지며, Web 렌더링이나 목업 이미지를 사용하지 않았습니다.
 
-This screenshot is rendered from the current repository using a Flutter Web release build, so reviewers can understand the booking interface without setting up Flutter locally.
+These are original **Android Emulator (API 35, 1080×2400)** captures from the running Flutter app, following the same **Suseo → Busan** journey through home, KTX schedule, seat selection, and demo booking confirmation. They are not Flutter Web renders or design mockups.
 
 ## 한국어
 
@@ -53,7 +60,7 @@ This screenshot is rendered from the current repository using a Flutter Web rele
 - 이 프로젝트는 실제 K-Rail 예매 서비스와 연동되어 있지 않으며, 데모 목적으로 제작되었습니다.
 - 열차 스케줄 및 가격 정보는 실제와 다를 수 있습니다.
 - 결제 기능은 실제 결제가 이루어지지 않으며, 시뮬레이션 목적으로만 구현되어 있습니다.
-- 2026-08-20 기준 `flutter pub get`과 `flutter build web --release`를 다시 실행해 빌드 가능 상태를 확인했습니다.
+- 2026-08-20 기준 `flutter pub get`, `flutter test`, `flutter analyze`, Android debug build/install/run과 실제 Emulator navigation을 다시 검증했습니다.
 
 ## English
 
@@ -98,6 +105,7 @@ The `lib` folder of the project consists of the following files:
 - This project is not linked to the actual K-Rail service and was created for demonstration purposes.
 - Train schedules and price information may differ from reality.
 - The payment function does not process actual payments and is implemented for simulation purposes only.
+- As of 2026-08-20, dependency resolution, widget tests, static analysis, Android debug build/install/run, and the full Emulator booking flow were re-verified.
 
 ## 日本語
 

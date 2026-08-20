@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'seat_page.dart';
+
 import 'app_localizations.dart';
+import 'seat_page.dart';
+import 'station_list.dart';
 
 class TrainSchedulePage extends StatefulWidget {
   final String departureStation;
@@ -24,19 +26,18 @@ class TrainSchedulePage extends StatefulWidget {
     required this.childCount,
     required this.seniorCount,
     required this.isRoundTrip,
-    required this.selectedLocale, // 언어 설정 받아오는 부분
+    required this.selectedLocale,
   });
 
   @override
-  _TrainSchedulePageState createState() => _TrainSchedulePageState();
+  State<TrainSchedulePage> createState() => _TrainSchedulePageState();
 }
 
 class _TrainSchedulePageState extends State<TrainSchedulePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  late List<TrainSchedule> departureSchedules;
-  late List<TrainSchedule> returnSchedules;
-  bool isShowingReturn = false;
+  late final List<TrainSchedule> departureSchedules;
+  late final List<TrainSchedule> returnSchedules;
   TrainSchedule? selectedDepartureSchedule;
   TrainSchedule? selectedReturnSchedule;
 
@@ -45,61 +46,51 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     super.initState();
     _tabController =
         TabController(length: widget.isRoundTrip ? 2 : 1, vsync: this);
-    _loadSchedules();
-  }
-
-  void _loadSchedules() {
-    Map<String, List<TrainSchedule>> allSchedules =
-        TrainScheduleService.getSchedules(
+    final schedules = TrainScheduleService.getSchedules(
       widget.departureStation,
       widget.arrivalStation,
       widget.departureDate,
-      widget.isRoundTrip ? (widget.returnDate) : null,
+      widget.isRoundTrip ? widget.returnDate : null,
     );
-    departureSchedules = allSchedules['departure']!;
-    if (widget.isRoundTrip) {
-      returnSchedules = allSchedules['return']!;
-    }
+    departureSchedules = schedules['departure'] ?? const [];
+    returnSchedules = schedules['return'] ?? const [];
   }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  int get _passengerCount =>
+      widget.adultCount + widget.childCount + widget.seniorCount;
 
   void _selectSchedule(TrainSchedule schedule, bool isReturn) {
     setState(() {
       if (isReturn) {
-        // 같은 스케줄을 다시 클릭한 경우 선택 해제
-        if (selectedReturnSchedule?.trainNumber == schedule.trainNumber) {
-          selectedReturnSchedule = null;
-        } else {
-          selectedReturnSchedule = schedule;
-        }
+        selectedReturnSchedule = schedule;
       } else {
-        // 같은 스케줄을 다시 클릭한 경우 선택 해제
-        if (selectedDepartureSchedule?.trainNumber == schedule.trainNumber) {
-          selectedDepartureSchedule = null;
-        } else {
-          selectedDepartureSchedule = schedule;
-          if (!widget.isRoundTrip) {
-            _startSeatSelection();
-          } else {
-            // 왕복인 경우 도착편 탭으로 전환
-            isShowingReturn = true;
-            _tabController.animateTo(1);
-          }
-        }
+        selectedDepartureSchedule = schedule;
       }
     });
+
+    if (!widget.isRoundTrip) {
+      _startSeatSelection();
+      return;
+    }
+
+    if (!isReturn) {
+      _tabController.animateTo(1);
+    } else {
+      _startSeatSelection();
+    }
   }
 
-// 좌석 선택 시작 메서드 추가
   void _startSeatSelection() {
+    if (selectedDepartureSchedule == null) return;
     if (widget.isRoundTrip && selectedReturnSchedule == null) return;
 
-    // 출발편 좌석 선택부터 시작
-    _navigateToSeatSelection(isReturn: false);
-  }
-
-  void _navigateToSeatSelection({required bool isReturn}) {
-    TrainSchedule currentSchedule =
-        isReturn ? selectedReturnSchedule! : selectedDepartureSchedule!;
+    final currentSchedule = selectedDepartureSchedule!;
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -112,17 +103,16 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
           childCount: widget.childCount,
           seniorCount: widget.seniorCount,
           isRoundTrip: widget.isRoundTrip,
-          selectedDepartureDate:
-              isReturn ? widget.returnDate : widget.departureDate,
+          selectedDepartureDate: widget.departureDate,
           selectedReturnDate: widget.returnDate,
-          departureSchedule: selectedDepartureSchedule!,
+          departureSchedule: selectedDepartureSchedule,
           returnSchedule: selectedReturnSchedule,
           departureTime: currentSchedule.departureTime,
           departureArrivalTime: currentSchedule.arrivalTime,
-          returnDepartureTime: isReturn ? currentSchedule.departureTime : null,
-          returnArrivalTime: isReturn ? currentSchedule.arrivalTime : null,
-          isSelectingReturn: true,
-          selectedLocale: widget.selectedLocale, // 언어 설정 전달
+          returnDepartureTime: selectedReturnSchedule?.departureTime,
+          returnArrivalTime: selectedReturnSchedule?.arrivalTime,
+          isSelectingReturn: false,
+          selectedLocale: widget.selectedLocale,
         ),
       ),
     );
@@ -132,99 +122,332 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('열차시간표')),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: AppLocalizations.of(context).translate('출발편')),
-            if (widget.isRoundTrip)
-              Tab(text: AppLocalizations.of(context).translate('도착편')),
+        title: Text(
+          AppLocalizations.of(context).translate('열차시간표'),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        bottom: widget.isRoundTrip
+            ? TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: AppLocalizations.of(context).translate('출발편')),
+                  Tab(text: AppLocalizations.of(context).translate('도착편')),
+                ],
+              )
+            : null,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildJourneyHeader(),
+            Expanded(
+              child: widget.isRoundTrip
+                  ? TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildScheduleList(departureSchedules, false),
+                        _buildScheduleList(returnSchedules, true),
+                      ],
+                    )
+                  : _buildScheduleList(departureSchedules, false),
+            ),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+    );
+  }
+
+  Widget _buildJourneyHeader() {
+    final scheme = Theme.of(context).colorScheme;
+    final date = DateFormat('M월 d일 (E)', 'ko').format(widget.departureDate);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
-            child: _buildScheduleList(departureSchedules, false),
+          Row(
+            children: [
+              Expanded(
+                child: _stationSummary(
+                  AppLocalizations.of(context).translate('출발'),
+                  widget.departureStation,
+                  CrossAxisAlignment.start,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: scheme.primary,
+                ),
+              ),
+              Expanded(
+                child: _stationSummary(
+                  AppLocalizations.of(context).translate('도착'),
+                  widget.arrivalStation,
+                  CrossAxisAlignment.end,
+                ),
+              ),
+            ],
           ),
-          if (widget.isRoundTrip)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
-              child: _buildScheduleList(returnSchedules, true),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: scheme.surface.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(14),
             ),
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_today_outlined, size: 17),
+                const SizedBox(width: 8),
+                Text(date, style: const TextStyle(fontWeight: FontWeight.w700)),
+                const Spacer(),
+                const Icon(Icons.person_outline_rounded, size: 18),
+                const SizedBox(width: 5),
+                Text(
+                  '$_passengerCount${AppLocalizations.of(context).translate('명')}',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  widget.isRoundTrip
+                      ? AppLocalizations.of(context).translate('왕복')
+                      : AppLocalizations.of(context).translate('편도'),
+                  style: TextStyle(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // 도착편 선택 후 좌석 선택 버튼 위젯
-  Widget _buildScheduleList(List<TrainSchedule> schedules, bool isReturn) {
+  Widget _stationSummary(
+    String label,
+    String station,
+    CrossAxisAlignment alignment,
+  ) {
     return Column(
+      crossAxisAlignment: alignment,
       children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: schedules.length,
-            itemBuilder: (context, index) =>
-                _buildScheduleItem(schedules[index], isReturn),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
         ),
-        if (isReturn && selectedReturnSchedule != null)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _startSeatSelection,
-              child: Text(AppLocalizations.of(context).translate('좌석 선택하기'),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-          ),
+        const SizedBox(height: 3),
+        Text(
+          AppLocalizations.of(context).translate(station),
+          style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
+        ),
       ],
     );
   }
 
-  Widget _buildScheduleItem(TrainSchedule schedule, bool isReturn) {
-    Duration duration = schedule.arrivalTime.difference(schedule.departureTime);
-    String durationStr =
-        '${duration.inHours}${AppLocalizations.of(context).translate('시간')} ${duration.inMinutes % 60}${AppLocalizations.of(context).translate('분')}';
-    bool isSelected = isReturn
+  Widget _buildScheduleList(List<TrainSchedule> schedules, bool isReturn) {
+    if (schedules.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context).translate('운행 열차가 없습니다.')),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+      itemCount: schedules.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) =>
+          _buildScheduleCard(schedules[index], isReturn, index),
+    );
+  }
+
+  Widget _buildScheduleCard(
+    TrainSchedule schedule,
+    bool isReturn,
+    int index,
+  ) {
+    final scheme = Theme.of(context).colorScheme;
+    final duration = schedule.arrivalTime.difference(schedule.departureTime);
+    final isSelected = isReturn
         ? selectedReturnSchedule?.trainNumber == schedule.trainNumber
         : selectedDepartureSchedule?.trainNumber == schedule.trainNumber;
+    final price = PriceInfo.getPrice(
+      schedule.departureStation,
+      schedule.arrivalStation,
+    );
+    final availableSeats = 7 + ((index * 11 + 9) % 34);
 
-    return ListTile(
-      title: Text(
-        schedule.trainNumber,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected
-              ? Colors.purple //선택되었을때 보라색 UI
-              : Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white // 다크 모드일때 흰색 UI
-                  : Colors.black, // 라이트 모드일때 검은색 UI
+    return Material(
+      color: isSelected ? scheme.primaryContainer : scheme.surface,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () => _selectSchedule(schedule, isReturn),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isSelected
+                  ? scheme.primary
+                  : scheme.outlineVariant.withValues(alpha: 0.65),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: scheme.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      schedule.trainNumber,
+                      style: TextStyle(
+                        color: scheme.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  if (index == 0) ...[
+                    const SizedBox(width: 8),
+                    _smallBadge(
+                      AppLocalizations.of(context).translate('추천'),
+                      Icons.auto_awesome_rounded,
+                    ),
+                  ],
+                  const Spacer(),
+                  Text(
+                    '$availableSeats${AppLocalizations.of(context).translate('석 남음')}',
+                    style: TextStyle(
+                      color: scheme.tertiary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _timeBlock(schedule.departureTime, schedule.departureStation),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          '${duration.inHours}${AppLocalizations.of(context).translate('시간')} ${duration.inMinutes % 60}${AppLocalizations.of(context).translate('분')}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Expanded(child: Divider(color: scheme.outlineVariant)),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
+                              child: Icon(
+                                Icons.train_rounded,
+                                size: 17,
+                                color: scheme.primary,
+                              ),
+                            ),
+                            Expanded(child: Divider(color: scheme.outlineVariant)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  _timeBlock(schedule.arrivalTime, schedule.arrivalStation),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.event_seat_outlined,
+                      size: 18, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Text(
+                    AppLocalizations.of(context).translate('일반실'),
+                    style: TextStyle(color: scheme.onSurfaceVariant),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${NumberFormat('#,###').format(price)}${AppLocalizations.of(context).translate('원')}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Icon(Icons.chevron_right_rounded, color: scheme.primary),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _smallBadge(String label, IconData icon) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 3),
+          Icon(icon, size: 12),
+          const SizedBox(width: 3),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+
+  Widget _timeBlock(DateTime time, String station) {
+    return SizedBox(
+      width: 74,
+      child: Column(
+        children: [
           Text(
-            '${AppLocalizations.of(context).translate('출발')}: ${DateFormat('HH:mm').format(schedule.departureTime)}, ' +
-                '${AppLocalizations.of(context).translate('도착')}: ${DateFormat('HH:mm').format(schedule.arrivalTime)}',
+            DateFormat('HH:mm').format(time),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
           ),
-          SizedBox(height: 2), // 줄 간격 조정
+          const SizedBox(height: 3),
           Text(
-            '${AppLocalizations.of(context).translate('소요시간')}: $durationStr',
+            AppLocalizations.of(context).translate(station),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
           ),
         ],
       ),
-      onTap: () => _selectSchedule(schedule, isReturn),
-      tileColor: isSelected ? Colors.purple.withOpacity(0.1) : null,
     );
   }
 }
@@ -236,7 +459,7 @@ class TrainSchedule {
   final DateTime departureTime;
   final DateTime arrivalTime;
 
-  TrainSchedule({
+  const TrainSchedule({
     required this.trainNumber,
     required this.departureStation,
     required this.arrivalStation,
@@ -246,7 +469,7 @@ class TrainSchedule {
 }
 
 class TrainScheduleService {
-  static final List<String> stations = [
+  static const List<String> stations = [
     '수서',
     '동탄',
     '평택지제',
@@ -257,184 +480,37 @@ class TrainScheduleService {
     '동대구',
     '경주',
     '울산',
-    '부산'
+    '부산',
   ];
 
-  static T? firstWhereOrNull<T>(Iterable<T> iterable, bool Function(T) test) {
-    for (var element in iterable) {
-      if (test(element)) return element;
-    }
-    return null;
-  }
-
   static int calculateTravelTime(String departure, String arrival) {
-    int totalTime = 0;
-    String currentStation = departure;
-    bool isReverse = stations.indexOf(departure) > stations.indexOf(arrival);
-
-    while (currentStation != arrival) {
-      Map<String, int>? nextStations = travelTimes[currentStation];
-      if (nextStations == null) break;
-
-      String? nextStation;
-      if (isReverse) {
-        nextStation = firstWhereOrNull(
-          nextStations.keys,
-          (station) =>
-              stations.indexOf(station) < stations.indexOf(currentStation) &&
-              stations.indexOf(station) >= stations.indexOf(arrival),
-        );
-      } else {
-        nextStation = firstWhereOrNull(
-          nextStations.keys,
-          (station) =>
-              stations.indexOf(station) > stations.indexOf(currentStation) &&
-              stations.indexOf(station) <= stations.indexOf(arrival),
-        );
-      }
-
-      if (nextStation == null) break;
-      totalTime += nextStations[nextStation]!;
-      currentStation = nextStation;
+    final departureIndex = stations.indexOf(departure);
+    final arrivalIndex = stations.indexOf(arrival);
+    if (departureIndex < 0 || arrivalIndex < 0 || departureIndex == arrivalIndex) {
+      return 0;
     }
 
-    return totalTime;
+    final lower = departureIndex < arrivalIndex ? departureIndex : arrivalIndex;
+    final upper = departureIndex < arrivalIndex ? arrivalIndex : departureIndex;
+    var totalMinutes = 0;
+    for (var index = lower; index < upper; index++) {
+      totalMinutes += _segmentMinutes[index];
+    }
+    return totalMinutes;
   }
 
-  static final Map<String, Map<String, int>> travelTimes = {
-    '수서': {
-      '동탄': 15,
-      '평택지제': 25,
-      '천안아산': 40,
-      '오송': 50,
-      '대전': 80,
-      '김천구미': 105,
-      '동대구': 130,
-      '경주': 145,
-      '울산': 175,
-      '부산': 190
-    },
-    '동탄': {
-      '수서': 15,
-      '평택지제': 10,
-      '천안아산': 25,
-      '오송': 35,
-      '대전': 65,
-      '김천구미': 90,
-      '동대구': 115,
-      '경주': 130,
-      '울산': 160,
-      '부산': 175
-    },
-    '평택지제': {
-      '수서': 25,
-      '동탄': 10,
-      '천안아산': 15,
-      '오송': 25,
-      '대전': 55,
-      '김천구미': 80,
-      '동대구': 105,
-      '경주': 120,
-      '울산': 150,
-      '부산': 165
-    },
-    '천안아산': {
-      '수서': 40,
-      '동탄': 25,
-      '평택지제': 15,
-      '오송': 10,
-      '대전': 40,
-      '김천구미': 65,
-      '동대구': 90,
-      '경주': 105,
-      '울산': 135,
-      '부산': 150
-    },
-    '오송': {
-      '수서': 50,
-      '동탄': 35,
-      '평택지제': 25,
-      '천안아산': 10,
-      '대전': 30,
-      '김천구미': 55,
-      '동대구': 80,
-      '경주': 95,
-      '울산': 125,
-      '부산': 140
-    },
-    '대전': {
-      '수서': 80,
-      '동탄': 65,
-      '평택지제': 55,
-      '천안아산': 40,
-      '오송': 30,
-      '김천구미': 25,
-      '동대구': 50,
-      '경주': 65,
-      '울산': 95,
-      '부산': 110
-    },
-    '김천구미': {
-      '수서': 105,
-      '동탄': 90,
-      '평택지제': 80,
-      '천안아산': 65,
-      '오송': 55,
-      '대전': 25,
-      '동대구': 25,
-      '경주': 40,
-      '울산': 70,
-      '부산': 85
-    },
-    '동대구': {
-      '수서': 130,
-      '동탄': 115,
-      '평택지제': 105,
-      '천안아산': 90,
-      '오송': 80,
-      '대전': 50,
-      '김천구미': 25,
-      '경주': 15,
-      '울산': 45,
-      '부산': 60
-    },
-    '경주': {
-      '수서': 145,
-      '동탄': 130,
-      '평택지제': 120,
-      '천안아산': 105,
-      '오송': 95,
-      '대전': 65,
-      '김천구미': 40,
-      '동대구': 15,
-      '울산': 30,
-      '부산': 45
-    },
-    '울산': {
-      '수서': 175,
-      '동탄': 160,
-      '평택지제': 150,
-      '천안아산': 135,
-      '오송': 125,
-      '대전': 95,
-      '김천구미': 70,
-      '동대구': 45,
-      '경주': 30,
-      '부산': 15
-    },
-    '부산': {
-      '수서': 190,
-      '동탄': 175,
-      '평택지제': 165,
-      '천안아산': 150,
-      '오송': 140,
-      '대전': 110,
-      '김천구미': 85,
-      '동대구': 60,
-      '경주': 45,
-      '울산': 15
-    }
-  };
+  static const List<int> _segmentMinutes = [
+    15,
+    10,
+    15,
+    10,
+    30,
+    25,
+    25,
+    15,
+    30,
+    15,
+  ];
 
   static Map<String, List<TrainSchedule>> getSchedules(
     String departure,
@@ -442,61 +518,43 @@ class TrainScheduleService {
     DateTime departureDate,
     DateTime? returnDate,
   ) {
-    Map<String, List<TrainSchedule>> allSchedules = {
-      'departure': [],
-      'return': [],
+    return {
+      'departure': _generateSchedules(departure, arrival, departureDate, false),
+      'return': returnDate == null
+          ? <TrainSchedule>[]
+          : _generateSchedules(arrival, departure, returnDate, true),
     };
-
-    // 출발편 스케줄 생성
-    allSchedules['departure'] =
-        _generateSchedules(departure, arrival, departureDate, false);
-
-    // 도착편 스케줄 생성 (왕복인 경우)
-    if (returnDate != null) {
-      allSchedules['return'] =
-          _generateSchedules(arrival, departure, returnDate, true);
-    }
-
-    return allSchedules;
   }
 
   static List<TrainSchedule> _generateSchedules(
-      String departure, String arrival, DateTime date, bool isReturn) {
-    List<TrainSchedule> schedules = [];
-    int travelTime = calculateTravelTime(departure, arrival);
-    if (travelTime == 0) {
-      return schedules;
-    }
+    String departure,
+    String arrival,
+    DateTime date,
+    bool isReturn,
+  ) {
+    final travelMinutes = calculateTravelTime(departure, arrival);
+    if (travelMinutes == 0) return const [];
 
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-
-    // 선택한 날짜가 오늘 이전이면 오늘 날짜로 설정
-    if (date.isBefore(today)) {
-      date = today;
-    }
-
-    // 06:00부터 22:00까지 1시간 간격으로 열차 스케줄 생성
-    for (int hour = 6; hour <= 22; hour++) {
-      DateTime depTime = DateTime(date.year, date.month, date.day, hour, 0);
-
-      // 오늘 날짜일 경우 현재 시간 이후의 스케줄만 생성
-      if (date.isAtSameMomentAs(today) && depTime.isBefore(now)) {
-        continue;
-      }
-
-      DateTime arrTime = depTime.add(Duration(minutes: travelTime));
-      int trainNumber =
-          isReturn ? 200 + schedules.length : 100 + schedules.length;
-      schedules.add(TrainSchedule(
+    // Demo data is deterministic so the portfolio flow remains usable at any
+    // time of day while still reflecting the date chosen by the user.
+    const departureMinutes = [370, 450, 530, 610, 690, 770, 850, 930, 1010];
+    return List.generate(departureMinutes.length, (index) {
+      final minuteOfDay = departureMinutes[index];
+      final departureTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        minuteOfDay ~/ 60,
+        minuteOfDay % 60,
+      );
+      final number = (isReturn ? 200 : 100) + index * 2 + 1;
+      return TrainSchedule(
+        trainNumber: 'KTX $number',
         departureStation: departure,
         arrivalStation: arrival,
-        departureTime: depTime,
-        arrivalTime: arrTime,
-        trainNumber: 'KTX$trainNumber',
-      ));
-    }
-
-    return schedules;
+        departureTime: departureTime,
+        arrivalTime: departureTime.add(Duration(minutes: travelMinutes)),
+      );
+    });
   }
 }

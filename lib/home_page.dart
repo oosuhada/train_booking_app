@@ -11,12 +11,12 @@ class HomePage extends StatefulWidget {
   final Function(Locale) onLanguageChanged;
 
   const HomePage({
-    Key? key,
+    super.key,
     required this.onLanguageChanged,
-  }) : super(key: key);
+  });
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -37,8 +37,8 @@ class _HomePageState extends State<HomePage> {
 
   void _initializeData() {
     setState(() {
-      departureStation;
-      arrivalStation;
+      departureStation = '수서';
+      arrivalStation = '부산';
       departureDate = DateTime.now();
       returnDate = DateTime.now().add(const Duration(days: 1));
       adultCount = 1;
@@ -114,113 +114,210 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).translate('K-Rail 간편 서비스'),
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.purple,
-        elevation: 0,
+        title: const Text(
+          'K-Rail',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Language',
+            onPressed: _showLanguageDialog,
+            icon: const Icon(Icons.language_rounded),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(20),
+                margin: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 162, 50, 181),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primary,
+                      const Color(0xFF8B5CF6),
+                    ],
                   ),
+                  borderRadius: BorderRadius.circular(28),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 승차권 예매 탭
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).translate('승차권 예매'),
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 3),
-                          Text(
-                            'Convenient Booking',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
-                          ),
-                        ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'K-RAIL · DEMO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 5),
-                    // 승차권 관리 탭
-                    _buildTabItem(context, Icons.article, '승차권 관리'),
-                    // 열차위치 확인 탭
-                    _buildTabItem(context, Icons.location_on, '열차위치 확인'),
-                    // 언어 선택 탭
-                    _buildTabItem(context, Icons.language, 'Language',
-                        onTap: _showLanguageDialog),
+                    const SizedBox(height: 16),
+                    Text(
+                      AppLocalizations.of(context).translate('승차권 예매'),
+                      style: const TextStyle(
+                        fontSize: 30,
+                        height: 1.1,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '수서에서 부산까지, 원하는 여정을 빠르게 찾아보세요.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.45,
+                        color: Colors.white.withValues(alpha: 0.86),
+                      ),
+                    ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.all(18),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDateSelector(),
-                            Divider(height: 30),
+                            Row(
+                              children: [
+                                Text(
+                                  '여정 선택',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.secondaryContainer,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    isRoundTrip
+                                        ? AppLocalizations.of(context)
+                                            .translate('왕복')
+                                        : AppLocalizations.of(context)
+                                            .translate('편도'),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
                             _buildStationSelector(),
-                            Divider(height: 30),
+                            const Divider(height: 32),
+                            _buildDateSelector(),
+                            const Divider(height: 32),
                             _buildPassengerAndTripTypeSelector(),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             _buildBookButton(),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                      decoration: BoxDecoration(),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).translate('더보기'),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios, size: 18),
-                        ],
-                      ),
+                    const SizedBox(height: 22),
+                    Text(
+                      '빠른 서비스',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w800),
                     ),
-                    SizedBox(height: 5),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: _buildLogoContainer(),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _buildQuickService(
+                          Icons.confirmation_number_outlined,
+                          AppLocalizations.of(context).translate('승차권 관리'),
+                        ),
+                        const SizedBox(width: 10),
+                        _buildQuickService(
+                          Icons.train_outlined,
+                          AppLocalizations.of(context).translate('열차위치 확인'),
+                        ),
+                        const SizedBox(width: 10),
+                        _buildQuickService(
+                          Icons.language_rounded,
+                          'Language',
+                          onTap: _showLanguageDialog,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                'asset/KRAIL_LOGO.jpg',
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'K-Rail mobile booking',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '시간표 · 좌석 선택 · 결제까지 이어지는 데모 플로우',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -236,140 +333,83 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context).translate('날짜 선택'),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        Text(
+          AppLocalizations.of(context).translate('날짜 선택'),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[800] // 다크모드일 때
-                      : Colors.grey[200], // 라이트모드일 때
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: _buildDateButton(
-                    AppLocalizations.of(context).translate('가는 날'),
-                    departureDate, (picked) {
-                  setState(() {
-                    departureDate = picked;
-                    // 가는 날이 오는 날보다 늦으면 오는 날을 null로 설정
-                    if (isRoundTrip &&
-                        returnDate != null &&
-                        picked!.isAfter(returnDate!)) {
-                      returnDate = null;
-                    }
-                  });
-                }),
-              ),
+              child: _buildDateButton(
+                  AppLocalizations.of(context).translate('가는 날'), departureDate,
+                  (picked) {
+                setState(() {
+                  departureDate = picked;
+                  // 가는 날이 오는 날보다 늦으면 오는 날을 null로 설정
+                  if (isRoundTrip &&
+                      returnDate != null &&
+                      picked!.isAfter(returnDate!)) {
+                    returnDate = null;
+                  }
+                });
+              }),
             ),
             if (isRoundTrip) ...[
               SizedBox(width: 10),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _buildDateButton(
-                      AppLocalizations.of(context).translate('오는 날'),
-                      returnDate, (picked) {
-                    setState(() {
-                      if (departureDate != null &&
-                          !picked!.isBefore(departureDate!)) {
-                        returnDate = picked;
-                      } else {
-                        // 오는 날이 가는 날보다 빠르면 경고 메시지 표시
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)
-                                  .translate('오는 날은 가는 날 이후여야 합니다.'),
-                              style: TextStyle(
-                                fontSize: 18, // 글자 크기를 키웁니다
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
-                            ),
-                            backgroundColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.grey[800] // 다크 테마일 때의 배경색
-                                    : Colors.grey[200], // 라이트 테마일 때의 배경색
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: EdgeInsets.all(16),
-                            padding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 16),
-                            duration: Duration(seconds: 4),
-                            action: SnackBarAction(
-                              label:
-                                  AppLocalizations.of(context).translate('확인'),
-                              textColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              onPressed: () {
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                              },
+                child: _buildDateButton(
+                    AppLocalizations.of(context).translate('오는 날'), returnDate,
+                    (picked) {
+                  setState(() {
+                    if (departureDate != null &&
+                        !picked!.isBefore(departureDate!)) {
+                      returnDate = picked;
+                    } else {
+                      // 오는 날이 가는 날보다 빠르면 경고 메시지 표시
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)
+                                .translate('오는 날은 가는 날 이후여야 합니다.'),
+                            style: TextStyle(
+                              fontSize: 18, // 글자 크기를 키웁니다
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
                             ),
                           ),
-                        );
-                      }
-                    });
-                  }),
-                ),
+                          backgroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800] // 다크 테마일 때의 배경색
+                                  : Colors.grey[200], // 라이트 테마일 때의 배경색
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: EdgeInsets.all(16),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 16),
+                          duration: Duration(seconds: 4),
+                          action: SnackBarAction(
+                            label: AppLocalizations.of(context).translate('확인'),
+                            textColor: Theme.of(context).colorScheme.secondary,
+                            onPressed: () {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                            },
+                          ),
+                        ),
+                      );
+                    }
+                  });
+                }),
               ),
             ],
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildTabItem(BuildContext context, IconData icon, String text,
-      {VoidCallback? onTap}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 70,
-          margin: EdgeInsets.symmetric(horizontal: 3),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(8), // 모든 방향으로 패딩 추가
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: Colors.white, size: 24),
-                SizedBox(height: 4),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      text == 'Language'
-                          ? text
-                          : AppLocalizations.of(context).translate(text),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10, // 폰트 크기를 약간 줄임
-                        color: Colors.white,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -389,7 +429,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           // 다크모드 대응을 위한 배경색 설정
           color: date != null
@@ -403,73 +443,65 @@ class _HomePageState extends State<HomePage> {
                 ? Colors.grey[600]! // 다크모드에서의 테두리
                 : Colors.grey, // 라이트모드에서의 테두리
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Text(
-          date == null ? label : DateFormat(' yyyy-MM-dd').format(date),
-          style: TextStyle(
-            fontSize: 16,
-            color: date == null
-                ? Colors.grey // 날짜 미선택 시 회색
-                : Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white // 다크모드에서 날짜 선택 시 흰색
-                    : Colors.black87, // 라이트모드에서 날짜 선택 시 검정
-          ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: const TextStyle(fontSize: 11)),
+                  const SizedBox(height: 2),
+                  Text(
+                    date == null ? '선택' : DateFormat('MM월 dd일').format(date),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildStationSelector() {
-    return Container(
-      height: 150, // 높이를 200에서 150으로 줄임
-      decoration: BoxDecoration(
-        color: Colors.white30,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 10, // 위치를 위로 조정
-            left: 0,
-            right: 0,
-            child: Center(
-              child: IconButton(
-                icon: Icon(Icons.swap_horiz),
-                onPressed: () {
-                  setState(() {
-                    final temp = departureStation;
-                    departureStation = arrivalStation;
-                    arrivalStation = temp;
-                  });
-                },
-              ),
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStationButton(
+            AppLocalizations.of(context).translate('출발역'),
+            departureStation,
+            arrivalStation,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: _buildStationButton(
-                    AppLocalizations.of(context).translate('출발역'),
-                    departureStation,
-                    arrivalStation),
-              ),
-              Container(
-                width: 2,
-                height: 40, // 높이를 50에서 40으로 줄임
-                color: Colors.grey[400],
-              ),
-              Expanded(
-                child: _buildStationButton(
-                    AppLocalizations.of(context).translate('도착역'),
-                    arrivalStation,
-                    departureStation),
-              ),
-            ],
+        ),
+        const SizedBox(width: 10),
+        IconButton.filledTonal(
+          tooltip: '출발/도착 바꾸기',
+          icon: const Icon(Icons.swap_horiz_rounded),
+          onPressed: () {
+            setState(() {
+              final temp = departureStation;
+              departureStation = arrivalStation;
+              arrivalStation = temp;
+            });
+          },
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildStationButton(
+            AppLocalizations.of(context).translate('도착역'),
+            arrivalStation,
+            departureStation,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -494,47 +526,37 @@ class _HomePageState extends State<HomePage> {
           });
         }
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            AppLocalizations.of(context).translate(label),
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
-          SizedBox(height: 10),
-          Container(
-            height: 60,
-            width: 150,
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Center(
-              child: AutoSizeText(
-                station != null
-                    ? AppLocalizations.of(context).translate(station)
-                    : AppLocalizations.of(context).translate('선택'),
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2, // 줄 간격 조정
-
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? station != null
-                          ? Colors.white
-                          : Colors.grey[400] // 다크모드일 때
-                      : station != null
-                          ? Colors.black
-                          : Colors.grey[600], // 라이트모드일 때
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                minFontSize: 18,
-                stepGranularity: 1,
-                overflow: TextOverflow.ellipsis,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          children: [
+            Text(
+              AppLocalizations.of(context).translate(label),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-          )
-        ],
+            const SizedBox(height: 7),
+            AutoSizeText(
+              station != null
+                  ? AppLocalizations.of(context).translate(station)
+                  : AppLocalizations.of(context).translate('선택'),
+              style: const TextStyle(
+                fontSize: 27,
+                fontWeight: FontWeight.w800,
+              ),
+              maxLines: 1,
+              minFontSize: 16,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -563,30 +585,47 @@ class _HomePageState extends State<HomePage> {
               });
             }
           },
-          child: Text(
-            _buildPassengerSummary(),
-            style: TextStyle(fontSize: 16),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.people_alt_outlined, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _buildPassengerSummary(),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ],
+            ),
           ),
         ),
-        SizedBox(height: 15),
+        const SizedBox(height: 14),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(AppLocalizations.of(context).translate('편도')),
-            SizedBox(width: 20),
-            Switch(
-              value: isRoundTrip,
-              onChanged: (value) {
+            ChoiceChip(
+              label: Text(AppLocalizations.of(context).translate('편도')),
+              selected: !isRoundTrip,
+              onSelected: (_) => setState(() => isRoundTrip = false),
+            ),
+            const SizedBox(width: 8),
+            ChoiceChip(
+              label: Text(AppLocalizations.of(context).translate('왕복')),
+              selected: isRoundTrip,
+              onSelected: (_) {
                 setState(() {
-                  isRoundTrip = value;
-                  if (isRoundTrip) {
-                    returnDate = departureDate?.add(Duration(days: 1));
-                  }
+                  isRoundTrip = true;
+                  returnDate ??= departureDate?.add(const Duration(days: 1));
                 });
               },
             ),
-            SizedBox(width: 20),
-            Text(AppLocalizations.of(context).translate('왕복')),
           ],
         ),
       ],
@@ -615,7 +654,7 @@ class _HomePageState extends State<HomePage> {
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: FilledButton.icon(
         onPressed: canBook
             ? () {
                 if (isRoundTrip && returnDate == null) {
@@ -646,37 +685,46 @@ class _HomePageState extends State<HomePage> {
                 );
               }
             : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15.0),
+        icon: const Icon(Icons.search_rounded),
+        label: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15),
           child: Text(
             AppLocalizations.of(context).translate('예매하기'),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLogoContainer() {
-    return Container(
-      height: 200,
-      color: Colors.grey[300],
-      child: Center(
-        child: Image.asset(
-          'asset/KRAIL_LOGO.jpg',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+  Widget _buildQuickService(IconData icon, String label,
+      {VoidCallback? onTap}) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          height: 96,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 26),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
         ),
       ),
     );
