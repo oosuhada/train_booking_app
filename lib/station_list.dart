@@ -21,21 +21,66 @@ class StationListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final availableStations =
+        stations.where((station) => station != selectedStation).toList();
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar:
-          AppBar(title: Text(AppLocalizations.of(context).translate('역 선택'))),
-      body: ListView.builder(
-        itemCount: stations.length,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).translate('역 선택')),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        itemCount: availableStations.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
-          if (stations[index] == selectedStation) {
-            return Container();
-          }
-          return ListTile(
-            title: Text(AppLocalizations.of(context).translate(stations[index]),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            onTap: () {
-              Navigator.pop(context, stations[index]);
-            },
+          final station = availableStations[index];
+
+          return Material(
+            color: colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: colorScheme.outlineVariant),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => Navigator.pop(context, station),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.train_outlined,
+                        color: colorScheme.onPrimaryContainer,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context).translate(station),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),
