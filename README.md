@@ -2,6 +2,14 @@
 
 A Flutter project - K-Rail 기차 예매 서비스 / K-Rail Train Booking Service / K-Rail 列車予約サービス / K-Rail 火车订票服务
 
+## UI Preview / 구현 화면
+
+![K-Rail Flutter booking interface](.github/assets/ui-preview.png)
+
+이 이미지는 현재 저장소를 Flutter Web release 모드로 빌드한 뒤 실제 렌더링한 화면입니다. 실행하지 않고도 프로젝트의 예약 UI 방향을 빠르게 확인할 수 있도록 README에 포함했습니다.
+
+This screenshot is rendered from the current repository using a Flutter Web release build, so reviewers can understand the booking interface without setting up Flutter locally.
+
 ## 한국어
 
 ### 프로젝트 개요
@@ -45,6 +53,7 @@ A Flutter project - K-Rail 기차 예매 서비스 / K-Rail Train Booking Servic
 - 이 프로젝트는 실제 K-Rail 예매 서비스와 연동되어 있지 않으며, 데모 목적으로 제작되었습니다.
 - 열차 스케줄 및 가격 정보는 실제와 다를 수 있습니다.
 - 결제 기능은 실제 결제가 이루어지지 않으며, 시뮬레이션 목적으로만 구현되어 있습니다.
+- 2026-08-20 기준 `flutter pub get`과 `flutter build web --release`를 다시 실행해 빌드 가능 상태를 확인했습니다.
 
 ## English
 
