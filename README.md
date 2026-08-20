@@ -1,8 +1,12 @@
 # K-Rail Train Booking Demo
 
+### Overview / 프로젝트 소개
+
 한국 철도 예매 경험을 모바일 환경에서 구현한 Flutter 포트폴리오 데모입니다. 출발지/도착지 선택부터 KTX 시간표 조회, 좌석 선택, 예약 확인까지 하나의 흐름으로 구성했습니다.
 
 A Flutter portfolio demo that recreates a Korean train-booking journey, from route selection and KTX schedules to seat selection and booking confirmation.
+
+### Demo Journey / 대표 데모 여정
 
 대표 데모 여정은 **수서 → 부산 / 편도 / 성인 1명**입니다.
 
