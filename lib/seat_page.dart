@@ -198,13 +198,10 @@ class _SeatPageState extends State<SeatPage> {
     final scheme = Theme.of(context).colorScheme;
     final schedule = _currentSchedule;
     final duration = schedule.arrivalTime.difference(schedule.departureTime);
-    return Container(
-      width: double.infinity,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(24),
+      blurSigma: 14,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
-        borderRadius: BorderRadius.circular(24),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -306,14 +303,19 @@ class _SeatPageState extends State<SeatPage> {
   }
 
   Widget _buildLegend() {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 8,
-      children: [
-        _legendItem('선택 가능', SeatVisualState.available),
-        _legendItem('선택됨', SeatVisualState.selected),
-        _legendItem('선택 불가', SeatVisualState.unavailable),
-      ],
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(18),
+      blurSigma: 10,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 8,
+        children: [
+          _legendItem('선택 가능', SeatVisualState.available),
+          _legendItem('선택됨', SeatVisualState.selected),
+          _legendItem('선택 불가', SeatVisualState.unavailable),
+        ],
+      ),
     );
   }
 

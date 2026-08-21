@@ -167,74 +167,72 @@ class _TrainSchedulePageState extends State<TrainSchedulePage>
     final scheme = Theme.of(context).colorScheme;
     final date = DateFormat('M월 d일 (E)', 'ko').format(widget.departureDate);
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      child: AppGlassSurface(
         borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _stationSummary(
-                  AppLocalizations.of(context).translate('출발'),
-                  widget.departureStation,
-                  CrossAxisAlignment.start,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: scheme.primary,
-                ),
-              ),
-              Expanded(
-                child: _stationSummary(
-                  AppLocalizations.of(context).translate('도착'),
-                  widget.arrivalStation,
-                  CrossAxisAlignment.end,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
+        blurSigma: 14,
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            Row(
               children: [
-                const Icon(Icons.calendar_today_outlined, size: 17),
-                const SizedBox(width: 8),
-                Text(date, style: const TextStyle(fontWeight: FontWeight.w700)),
-                const Spacer(),
-                const Icon(Icons.person_outline_rounded, size: 18),
-                const SizedBox(width: 5),
-                Text(
-                  '$_passengerCount${AppLocalizations.of(context).translate('명')}',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                Expanded(
+                  child: _stationSummary(
+                    AppLocalizations.of(context).translate('출발'),
+                    widget.departureStation,
+                    CrossAxisAlignment.start,
+                  ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.isRoundTrip
-                      ? AppLocalizations.of(context).translate('왕복')
-                      : AppLocalizations.of(context).translate('편도'),
-                  style: TextStyle(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
                     color: scheme.primary,
-                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Expanded(
+                  child: _stationSummary(
+                    AppLocalizations.of(context).translate('도착'),
+                    widget.arrivalStation,
+                    CrossAxisAlignment.end,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            AppGlassSurface(
+              borderRadius: BorderRadius.circular(14),
+              blurSigma: 8,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined, size: 17),
+                  const SizedBox(width: 8),
+                  Text(date,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const Spacer(),
+                  const Icon(Icons.person_outline_rounded, size: 18),
+                  const SizedBox(width: 5),
+                  Text(
+                    '$_passengerCount${AppLocalizations.of(context).translate('명')}',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.isRoundTrip
+                        ? AppLocalizations.of(context).translate('왕복')
+                        : AppLocalizations.of(context).translate('편도'),
+                    style: TextStyle(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

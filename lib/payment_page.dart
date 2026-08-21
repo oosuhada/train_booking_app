@@ -150,14 +150,10 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget _buildJourneyCard() {
     final scheme = Theme.of(context).colorScheme;
     final schedule = widget.departureSchedule!;
-    return Container(
-      width: double.infinity,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(24),
+      blurSigma: 14,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -210,13 +206,10 @@ class _PaymentPageState extends State<PaymentPage> {
             ],
           ),
           const SizedBox(height: 15),
-          Container(
-            width: double.infinity,
+          AppGlassSurface(
+            borderRadius: BorderRadius.circular(14),
+            blurSigma: 8,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-            ),
             child: Row(
               children: [
                 const Icon(Icons.calendar_today_outlined, size: 17),
@@ -264,7 +257,6 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Widget _buildPassengerCard() {
-    final scheme = Theme.of(context).colorScheme;
     final passengerParts = <String>[];
     if (widget.adultCount > 0) {
       passengerParts.add(
@@ -279,14 +271,10 @@ class _PaymentPageState extends State<PaymentPage> {
           '${AppLocalizations.of(context).translate('경로')} ${widget.seniorCount}');
     }
 
-    return Container(
-      width: double.infinity,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(24),
+      blurSigma: 12,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -337,15 +325,10 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Widget _buildPriceCard() {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(24),
+      blurSigma: 12,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -520,14 +503,10 @@ class _PaymentPageState extends State<PaymentPage> {
                           fontSize: 12, color: scheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 22),
-                    Container(
-                      width: double.infinity,
+                    AppGlassSurface(
+                      borderRadius: BorderRadius.circular(26),
+                      blurSigma: 14,
                       padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: scheme.surface,
-                        borderRadius: BorderRadius.circular(26),
-                        border: Border.all(color: scheme.outlineVariant),
-                      ),
                       child: Column(
                         children: [
                           Row(
