@@ -28,9 +28,7 @@ class AppLocalizations {
 
   // 안전한 싱글톤 접근자
   static AppLocalizations get current {
-    if (_current == null) {
-      _current = AppLocalizations(const Locale('ko')); // 기본값으로 한국어 설정
-    }
+    _current ??= AppLocalizations(const Locale('ko')); // 기본값으로 한국어 설정
     return _current!;
   }
 
