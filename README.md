@@ -12,7 +12,7 @@ A Flutter portfolio demo that recreates a Korean train-booking journey, from rou
 
 The representative demo journey is **Suseo → Busan / one-way / one adult**.
 
-## Preview / 미리보기
+## User Flow Preview / 사용자 흐름 미리보기
 
 <p align="center">
   <img src=".github/assets/portfolio/01-home-booking.png" alt="K-Rail booking home" width="47%" />
@@ -26,16 +26,6 @@ The representative demo journey is **Suseo → Busan / one-way / one adult**.
   <img src=".github/assets/portfolio/06-booking-review.png" alt="K-Rail booking review before confirmation" width="47%" />
   <img src=".github/assets/portfolio/04-booking-confirmation.png" alt="K-Rail booking confirmation" width="47%" />
 </p>
-<p align="center">
-  <img src=".github/assets/portfolio/07-dark-home.png" alt="K-Rail v2 dark mode booking home" width="47%" />
-</p>
-
-<p align="center"><strong>07 · Dark mode / 다크 모드</strong></p>
-
-위 이미지는 **Android Emulator (API 35, 1080×2400)** 에서 실제 Flutter 앱을 실행해 캡처했습니다. 홈 → 역 선택 → 시간표 → 좌석 선택 → 결제 전 예약 확인 → 예약 완료의 동일한 사용자 흐름을 보여주며 Flutter Web 렌더링이나 디자인 목업이 아닙니다.
-
-These screenshots were captured from the running Flutter app on an **Android Emulator (API 35, 1080×2400)**. They show the same home → station selection → schedule → seat selection → booking review → confirmation journey and are not Flutter Web renders or design mockups.
-
 ## What it does / 주요 기능
 
 - 출발역과 도착역 선택 / Select departure and arrival stations.
@@ -59,7 +49,6 @@ These screenshots were captured from the running Flutter app on an **Android Emu
 - Material 3
 - `flutter_localizations`
 - `intl`
-- Android Emulator — 디바이스 검증 및 포트폴리오 캡처 / device validation and portfolio captures
 
 ## Run / 실행
 
